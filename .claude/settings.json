@@ -20,7 +20,8 @@
       "Read(//c/Users/faund/.claude/projects/**)",
       "Bash(gunzip -c \"C:/Users/faund/.claude/projects/d--UGM-Kuliah-8th-Semester-MongoDB-Developer-capstone-MediSlot/6c27ca38-4b9a-4d1e-b810-ad4c7c22fac4/tool-results/webfetch-1779169612740-v8god1.bin\" > \"/tmp/mediSlot-prototype.html\" && echo \"Done, size: $\\(wc -c < /tmp/mediSlot-prototype.html\\) bytes\")",
       "Bash(unzip -l medislot.zip)",
-      "Bash(unzip -o medislot.zip -d /tmp/mediSlot-design)"
+      "Bash(unzip -o medislot.zip -d /tmp/mediSlot-design)",
+      "Bash(git rm *)"
     ],
     "deny": [
       "Bash(rm -rf *)",
