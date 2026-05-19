@@ -1,0 +1,33 @@
+# Environment variables — JANGAN PERNAH di-commit!
+.env
+backend/.env
+frontend/.env
+
+# Google OAuth credential files
+client_secret*.json
+*credentials*.json
+
+# Dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Build output
+frontend/build/
+dist/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/settings.json
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+CLAUDE.md
+security-reviewer.md
+new-feature.md
+medislot
