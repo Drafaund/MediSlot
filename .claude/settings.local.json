@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "WebFetch(domain:api.anthropic.com)",
-      "Read(//mnt/c/Users/faund/.claude/projects/d--UGM-Kuliah-8th-Semester-MongoDB-Developer-capstone-MediSlot/6c27ca38-4b9a-4d1e-b810-ad4c7c22fac4/**)",
-      "Bash(gunzip -c webfetch-1779169612740-v8god1.bin)"
-    ]
-  }
-}
