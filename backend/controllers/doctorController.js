@@ -21,7 +21,7 @@ const getDoctors = async (req, res) => {
 
     const doctors = await DoctorProfile.find(filter)
       .populate('userId', 'name avatar email')
-      .sort({ rating: -1 });
+      .sort({ yearsOfExperience: -1, createdAt: -1 });
 
     res.json({ success: true, data: doctors });
   } catch (error) {

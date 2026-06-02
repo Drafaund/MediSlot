@@ -1,6 +1,7 @@
 const MedicalRecord = require('../models/MedicalRecord');
 const Appointment   = require('../models/Appointment');
 const DoctorProfile = require('../models/DoctorProfile');
+const createNotif   = require('../utils/notify');
 
 // Helper: ambil DoctorProfile dari userId, lempar error jika tidak ada
 const getDoctorProfileOrFail = async (userId) => {
@@ -93,6 +94,15 @@ const createMedicalRecord = async (req, res) => {
       { path: 'doctorId', select: 'specialization clinicName', populate: { path: 'userId', select: 'name avatar' } },
       { path: 'appointmentId', select: 'date timeSlot queueNumber' }
     ]);
+
+    // Notifikasi ke pasien: rekam medis tersedia
+    const doctorUser = await doctorProfile.populate('userId', 'name');
+    createNotif({
+      userId: appointment.patientId,
+      type: 'record_created',
+      templateArgs: [doctorUser.userId?.name || 'Dokter'],
+      relatedId: record._id
+    });
 
     res.status(201).json({ success: true, data: populated, message: 'Rekam medis berhasil disimpan' });
   } catch (error) {

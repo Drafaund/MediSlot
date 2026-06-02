@@ -136,12 +136,12 @@ const Home = () => {
         <div>
           <SectionHeader
             title="Direkomendasikan untukmu"
-            sub="Dokter terbaik dengan rating tertinggi"
+            sub="Dokter tersedia di platform MediSlot"
             action={<Btn variant="ghost" iconRight="arrow-r" onClick={() => navigate('/doctors')}>Lihat semua</Btn>}
           />
           <div className="msGrid-2">
             {topDoctors.map(d => (
-              <DoctorCard key={d._id} d={{ ...d, initials: d.name?.split(' ').map(x => x[0]).slice(0, 2).join('') || 'Dr', color: 'sage', specLabel: d.specialization, clinic: d.clinicName, fee: d.consultationFee, bpjs: d.acceptBPJS, rating: d.rating || 4.8, reviews: d.reviewCount || 0, experience: d.experience || 5 }} onClick={() => navigate(`/doctors/${d._id}`)}/>
+              <DoctorCard key={d._id} d={{ ...d, name: d.userId?.name || 'Dokter', initials: d.userId?.name?.split(' ').map(x => x[0]).slice(0, 2).join('') || 'Dr', color: 'sage', specLabel: d.specialization, clinic: d.clinicName, fee: d.consultationFee, bpjs: d.acceptBPJS, experience: d.yearsOfExperience || 0 }} onClick={() => navigate(`/doctors/${d._id}`)}/>
             ))}
           </div>
         </div>

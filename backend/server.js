@@ -28,6 +28,7 @@ app.use('/api/doctors', require('./routes/doctorRoutes'));
 app.use('/api/schedules', require('./routes/scheduleRoutes'));
 app.use('/api/appointments', require('./routes/appointmentRoutes'));
 app.use('/api/medical-records', require('./routes/medicalRecordRoutes'));
+app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/ai', require('./routes/aiRoutes'));
 
 // Health check

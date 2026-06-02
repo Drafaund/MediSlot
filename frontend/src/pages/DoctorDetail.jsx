@@ -59,14 +59,9 @@ const DoctorDetail = () => {
             </div>
             <h1 style={{ fontFamily: 'var(--serif)', fontSize: 32, fontWeight: 600, lineHeight: 1.1 }}>{doctorName}</h1>
             <div style={{ color: 'var(--muted)', marginTop: 6, fontSize: 15 }}>
-              {d.specialization} · {d.experience || 5} tahun pengalaman
+              {d.specialization}{d.yearsOfExperience > 0 ? ` · ${d.yearsOfExperience} tahun pengalaman` : ''}
             </div>
             <div style={{ display: 'flex', gap: 24, marginTop: 16, alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Icon name="star" size={16} style={{ fill: '#D4A017', color: '#D4A017' }}/>
-                <strong>{d.rating || 4.8}</strong>
-                <span style={{ color: 'var(--muted)' }}>({d.reviewCount || 0} ulasan)</span>
-              </div>
               <div style={{ color: 'var(--muted)', fontSize: 14, display: 'flex', alignItems: 'center', gap: 4 }}>
                 <Icon name="pin" size={14}/> {d.city}
               </div>

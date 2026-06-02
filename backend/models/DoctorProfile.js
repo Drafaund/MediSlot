@@ -40,15 +40,14 @@ const DoctorProfileSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  yearsOfExperience: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
   isVerified: {
     type: Boolean,
     default: false
-  },
-  rating: {
-    type: Number,
-    default: 0,
-    min: 0,
-    max: 5
   }
 }, { timestamps: true });
 

@@ -65,9 +65,9 @@ async function seed() {
       city: 'Yogyakarta',
       consultationFee: 150000,
       acceptBPJS: true,
-      bio: 'Dokter spesialis penyakit dalam dengan pengalaman 10 tahun. Fokus pada diabetes, hipertensi, dan penyakit metabolik.',
-      isVerified: true,
-      rating: 4.8
+      bio: 'Dokter spesialis penyakit dalam dengan fokus pada diabetes, hipertensi, dan penyakit metabolik.',
+      yearsOfExperience: 10,
+      isVerified: true
     },
     {
       userId: dewi._id,
@@ -78,9 +78,9 @@ async function seed() {
       city: 'Yogyakarta',
       consultationFee: 125000,
       acceptBPJS: true,
-      bio: 'Dokter spesialis anak, berpengalaman dalam tumbuh kembang anak dan penyakit infeksi pada anak.',
-      isVerified: true,
-      rating: 4.9
+      bio: 'Dokter spesialis anak dengan fokus pada tumbuh kembang anak dan penyakit infeksi pada anak.',
+      yearsOfExperience: 8,
+      isVerified: true
     },
     {
       userId: reza._id,
@@ -92,8 +92,8 @@ async function seed() {
       consultationFee: 175000,
       acceptBPJS: false,
       bio: 'Dokter spesialis kebidanan dan kandungan. Melayani pemeriksaan kehamilan, USG, dan konsultasi kesehatan reproduksi wanita.',
-      isVerified: true,
-      rating: 4.7
+      yearsOfExperience: 7,
+      isVerified: true
     }
   ]);
   const [ahmadProfile, dewiProfile, rezaProfile] = profiles;

@@ -25,6 +25,7 @@ const DoctorProfileSetup = () => {
     clinicAddress: '',
     city: '',
     consultationFee: '',
+    yearsOfExperience: '',
     acceptBPJS: false,
     bio: '',
   });
@@ -41,6 +42,7 @@ const DoctorProfileSetup = () => {
             clinicAddress: p.clinicAddress || '',
             city: p.city || '',
             consultationFee: p.consultationFee?.toString() || '',
+            yearsOfExperience: p.yearsOfExperience != null ? p.yearsOfExperience.toString() : '',
             acceptBPJS: p.acceptBPJS || false,
             bio: p.bio || '',
           });
@@ -63,6 +65,7 @@ const DoctorProfileSetup = () => {
       const payload = {
         ...form,
         consultationFee: Number(form.consultationFee) || 0,
+        yearsOfExperience: Number(form.yearsOfExperience) || 0,
       };
       if (isEdit) {
         await api.put('/doctors/profile', payload);
@@ -136,7 +139,7 @@ const DoctorProfileSetup = () => {
 
       <Card>
         <div style={{ fontFamily: 'var(--serif)', fontSize: 17, marginBottom: 16 }}>Biaya & pembayaran</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, alignItems: 'start' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, alignItems: 'start' }}>
           <div>
             <label className="msField-lbl">Biaya konsultasi (Rp)</label>
             <div style={{ position: 'relative', marginTop: 6 }}>
@@ -146,6 +149,13 @@ const DoctorProfileSetup = () => {
                 onChange={e => set('consultationFee', e.target.value)}
                 style={{ width: '100%', border: '1px solid var(--border)', borderRadius: 8, padding: '10px 12px 10px 36px', fontSize: 14, background: 'var(--paper)', outline: 'none', boxSizing: 'border-box' }}/>
             </div>
+          </div>
+          <div>
+            <label className="msField-lbl">Pengalaman (tahun)</label>
+            <input type="number" min={0} max={60} placeholder="10"
+              value={form.yearsOfExperience}
+              onChange={e => set('yearsOfExperience', e.target.value)}
+              style={{ width: '100%', border: '1px solid var(--border)', borderRadius: 8, padding: '10px 12px', fontSize: 14, background: 'var(--paper)', outline: 'none', boxSizing: 'border-box', marginTop: 6 }}/>
           </div>
           <div>
             <label className="msField-lbl">BPJS Kesehatan</label>

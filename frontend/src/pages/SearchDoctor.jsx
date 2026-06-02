@@ -26,12 +26,56 @@ const SearchDoctor = () => {
   const [city, setCity] = useState(searchParams.get('city') || '');
   const [specialization, setSpecialization] = useState(searchParams.get('specialization') || '');
   const [bpjsOnly, setBpjsOnly] = useState(searchParams.get('acceptBPJS') === 'true');
-  const [sort, setSort] = useState('rating');
+  const [sort, setSort] = useState('fee');
+  const [locating, setLocating] = useState(false);
+  const [locError, setLocError] = useState('');
 
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const debounceRef = useRef(null);
+
+  const detectLocation = () => {
+    if (!navigator.geolocation) {
+      setLocError('Browser tidak mendukung geolokasi.');
+      return;
+    }
+    setLocating(true);
+    setLocError('');
+    navigator.geolocation.getCurrentPosition(
+      async ({ coords }) => {
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords.latitude}&lon=${coords.longitude}&accept-language=id`,
+            { headers: { 'User-Agent': 'MediSlot/1.0' } }
+          );
+          const data = await res.json();
+          const addr = data.address || {};
+          // Ambil nama kota dari field yang tersedia, prioritas kota > kota madya > kabupaten
+          const raw = addr.city || addr.town || addr.municipality || addr.county || addr.state_district || '';
+          // Hilangkan prefix "Kota " atau "Kabupaten "
+          const detected = raw.replace(/^(kota|kabupaten)\s+/i, '').trim();
+          if (detected) {
+            setCity(detected);
+            const params = buildParams({ city: detected });
+            applyAndFetch(params);
+          } else {
+            setLocError('Kota tidak terdeteksi. Coba pilih manual.');
+          }
+        } catch {
+          setLocError('Gagal mendapatkan nama kota. Coba pilih manual.');
+        } finally {
+          setLocating(false);
+        }
+      },
+      (err) => {
+        setLocating(false);
+        if (err.code === 1) setLocError('Izin lokasi ditolak. Aktifkan di pengaturan browser.');
+        else setLocError('Gagal mendeteksi lokasi. Coba pilih manual.');
+      },
+      { timeout: 8000 }
+    );
+  };
 
   const buildParams = useCallback((overrides = {}) => {
     const base = { search: q, city, specialization, acceptBPJS: bpjsOnly };
@@ -72,22 +116,21 @@ const SearchDoctor = () => {
   };
 
   const sortedDoctors = [...doctors].sort((a, b) => {
-    if (sort === 'rating') return (b.rating || 0) - (a.rating || 0);
     if (sort === 'fee') return (a.consultationFee || 0) - (b.consultationFee || 0);
+    if (sort === 'experience') return (b.yearsOfExperience || 0) - (a.yearsOfExperience || 0);
     return 0;
   });
 
   const mapDoctor = (d) => ({
     ...d,
-    initials: d.name?.split(' ').map(x => x[0]).slice(0, 2).join('') || 'Dr',
+    name: d.userId?.name || 'Dokter',
+    initials: d.userId?.name?.split(' ').map(x => x[0]).slice(0, 2).join('') || 'Dr',
     color: 'sage',
     specLabel: d.specialization,
     clinic: d.clinicName,
     fee: d.consultationFee || 0,
     bpjs: d.acceptBPJS,
-    rating: d.rating || 4.8,
-    reviews: d.reviewCount || 0,
-    experience: d.experience || 5,
+    experience: d.yearsOfExperience || 0,
   });
 
   return (
@@ -102,8 +145,37 @@ const SearchDoctor = () => {
           <Input icon="search" placeholder="Nama dokter, spesialisasi, atau klinik…" value={q} onChange={handleSearchChange}/>
           <Select value={specialization} onChange={v => { setSpecialization(v); applyAndFetch(buildParams({ specialization: v })); }}
             placeholder="Semua spesialisasi" options={SPECIALIZATIONS}/>
-          <Select value={city} onChange={v => { setCity(v); applyAndFetch(buildParams({ city: v })); }}
-            placeholder="Semua kota" options={CITIES}/>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <div style={{ flex: 1 }}>
+                <Select value={city} onChange={v => { setCity(v); applyAndFetch(buildParams({ city: v })); }}
+                  placeholder="Semua kota" options={CITIES}/>
+              </div>
+              <button
+                onClick={detectLocation}
+                disabled={locating}
+                title="Deteksi lokasi saya"
+                style={{
+                  flexShrink: 0, height: 40, padding: '0 10px', borderRadius: 8,
+                  border: '1px solid var(--border)', background: locating ? 'var(--bg-2)' : 'var(--paper)',
+                  cursor: locating ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 4,
+                  color: locating ? 'var(--muted)' : 'var(--accent)', fontSize: 13, fontWeight: 500,
+                  transition: 'all 0.15s',
+                }}
+              >
+                <Icon name="pin" size={14}/>
+                {locating ? 'Mendeteksi…' : 'Lokasiku'}
+              </button>
+            </div>
+            {locError && (
+              <div style={{ fontSize: 11, color: 'var(--warn)', lineHeight: 1.4 }}>{locError}</div>
+            )}
+            {!locError && city && !CITIES.includes(city) && (
+              <div style={{ fontSize: 11, color: 'var(--accent)', lineHeight: 1.4 }}>
+                📍 Terdeteksi: {city}
+              </div>
+            )}
+          </div>
           <Btn variant="secondary" icon="filter" onClick={() => applyAndFetch(buildParams())}>Filter</Btn>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
@@ -115,7 +187,7 @@ const SearchDoctor = () => {
             </label>
             <div style={{ width: 1, height: 16, background: 'var(--border)', margin: '0 6px' }}/>
             <div className="msTabs-mini">
-              {[['rating', 'Rating tertinggi'], ['fee', 'Harga terendah']].map(([v, l]) => (
+              {[['fee', 'Harga terendah'], ['experience', 'Pengalaman terlama']].map(([v, l]) => (
                 <button key={v} className={`msTab-mini ${sort === v ? 'msTab-mini-active' : ''}`} onClick={() => setSort(v)}>{l}</button>
               ))}
             </div>

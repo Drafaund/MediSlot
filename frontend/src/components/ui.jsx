@@ -193,15 +193,11 @@ export const DoctorCard = ({ d, onClick }) => (
     <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
       <Avatar initials={d.initials || d.name?.split(' ').map(x => x[0]).slice(0,2).join('') || '??'} color={d.color || 'sage'} size={56}/>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
-          <div style={{ minWidth: 0 }}>
-            <div className="msDoctor-name">{d.name}</div>
-            <div className="msDoctor-spec">{d.specLabel || d.specialization} · {d.experience} thn pengalaman</div>
-          </div>
-          <div className="msDoctor-rate">
-            <Icon name="star" size={14} style={{ fill: '#D4A017', color: '#D4A017' }}/>
-            <span style={{ fontWeight: 600 }}>{d.rating}</span>
-            <span style={{ color: 'var(--muted)' }}>({d.reviews || d.reviewCount})</span>
+        <div style={{ minWidth: 0 }}>
+          <div className="msDoctor-name">{d.name || 'Dokter'}</div>
+          <div className="msDoctor-spec">
+            {d.specLabel || d.specialization}
+            {d.experience > 0 && ` · ${d.experience} thn pengalaman`}
           </div>
         </div>
         <div className="msDoctor-meta">

@@ -1,6 +1,7 @@
 const Appointment = require('../models/Appointment');
 const DoctorProfile = require('../models/DoctorProfile');
 const Schedule = require('../models/Schedule');
+const createNotif = require('../utils/notify');
 
 // Helper: hitung queue number untuk dokter di tanggal tertentu
 const generateQueueNumber = async (doctorId, date) => {
@@ -83,6 +84,15 @@ const createAppointment = async (req, res) => {
       { path: 'patientId', select: 'name email phone avatar' },
       { path: 'doctorId', select: 'specialization clinicName clinicAddress consultationFee', populate: { path: 'userId', select: 'name avatar' } }
     ]);
+
+    // Notifikasi ke dokter: ada booking baru
+    const doctorUser = await doctor.populate('userId', '_id');
+    createNotif({
+      userId: doctorUser.userId._id,
+      type: 'booking_new',
+      templateArgs: [req.user.name],
+      relatedId: appointment._id
+    });
 
     res.status(201).json({ success: true, data: populated, message: 'Appointment berhasil dibuat' });
   } catch (error) {
@@ -213,8 +223,26 @@ const updateAppointmentStatus = async (req, res) => {
 
     const updated = await appointment.populate([
       { path: 'patientId', select: 'name email phone avatar' },
-      { path: 'doctorId', select: 'specialization clinicName', populate: { path: 'userId', select: 'name' } }
+      { path: 'doctorId', select: 'specialization clinicName', populate: { path: 'userId', select: 'name _id' } }
     ]);
+
+    // Notifikasi berdasarkan siapa yang ubah status dan ke siapa
+    const doctorName = updated.doctorId?.userId?.name || 'Dokter';
+    const patientName = updated.patientId?.name || 'Pasien';
+    const doctorUserId = updated.doctorId?.userId?._id;
+    const patientUserId = updated.patientId?._id;
+
+    if (status === 'confirmed' && patientUserId) {
+      createNotif({ userId: patientUserId, type: 'appointment_confirmed', templateArgs: [doctorName], relatedId: appointment._id });
+    } else if (status === 'completed' && patientUserId) {
+      createNotif({ userId: patientUserId, type: 'appointment_completed', templateArgs: [doctorName], relatedId: appointment._id });
+    } else if (status === 'cancelled') {
+      if (req.user.role === 'patient' && doctorUserId) {
+        createNotif({ userId: doctorUserId, type: 'appointment_cancelled_patient', templateArgs: [patientName], relatedId: appointment._id });
+      } else if (req.user.role === 'doctor' && patientUserId) {
+        createNotif({ userId: patientUserId, type: 'appointment_cancelled_doctor', templateArgs: [doctorName], relatedId: appointment._id });
+      }
+    }
 
     res.json({ success: true, data: updated, message: `Status appointment berhasil diubah menjadi '${status}'` });
   } catch (error) {
