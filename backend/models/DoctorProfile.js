@@ -40,6 +40,10 @@ const DoctorProfileSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  additionalDegrees: [{
+    type: String,
+    trim: true
+  }],
   yearsOfExperience: {
     type: Number,
     default: 0,

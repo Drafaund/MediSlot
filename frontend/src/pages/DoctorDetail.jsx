@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { Icon, Card, Badge, Avatar, Btn, SectionHeader, Empty, formatIDR } from '../components/ui';
+import { formatDoctorName } from '../utils/doctorName';
 
 const DAYS = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
 
@@ -40,7 +41,8 @@ const DoctorDetail = () => {
 
   const d = doctor;
   const initials = d.userId?.name?.split(' ').map(x => x[0]).slice(0, 2).join('') || d.name?.split(' ').map(x => x[0]).slice(0, 2).join('') || 'Dr';
-  const doctorName = d.userId?.name || d.name || 'Dokter';
+  const baseName   = d.userId?.name || d.name || '';
+  const doctorName = formatDoctorName(baseName, d.specialization, d.additionalDegrees);
   const activeDays = [1, 3, 5]; // Mon, Wed, Fri as default display
 
   return (

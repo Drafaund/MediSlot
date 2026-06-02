@@ -81,8 +81,8 @@ const createAppointment = async (req, res) => {
     });
 
     const populated = await appointment.populate([
-      { path: 'patientId', select: 'name email phone avatar' },
-      { path: 'doctorId', select: 'specialization clinicName clinicAddress consultationFee', populate: { path: 'userId', select: 'name avatar' } }
+      { path: 'patientId', select: 'name email phone avatar dateOfBirth gender bloodType allergies' },
+      { path: 'doctorId', select: 'specialization clinicName clinicAddress consultationFee additionalDegrees', populate: { path: 'userId', select: 'name avatar' } }
     ]);
 
     // Notifikasi ke dokter: ada booking baru
@@ -116,7 +116,7 @@ const getMyAppointments = async (req, res) => {
       Appointment.find(filter)
         .populate({
           path: 'doctorId',
-          select: 'specialization clinicName clinicAddress consultationFee city',
+          select: 'specialization clinicName clinicAddress consultationFee city additionalDegrees',
           populate: { path: 'userId', select: 'name avatar' }
         })
         .sort({ date: -1 })
@@ -160,7 +160,7 @@ const getDoctorAppointments = async (req, res) => {
 
     const [appointments, total] = await Promise.all([
       Appointment.find(filter)
-        .populate('patientId', 'name email phone avatar')
+        .populate('patientId', 'name email phone avatar dateOfBirth gender bloodType allergies')
         .sort({ queueNumber: 1 })
         .skip(skip)
         .limit(Number(limit)),
@@ -222,8 +222,8 @@ const updateAppointmentStatus = async (req, res) => {
     await appointment.save();
 
     const updated = await appointment.populate([
-      { path: 'patientId', select: 'name email phone avatar' },
-      { path: 'doctorId', select: 'specialization clinicName', populate: { path: 'userId', select: 'name _id' } }
+      { path: 'patientId', select: 'name email phone avatar dateOfBirth gender bloodType allergies' },
+      { path: 'doctorId', select: 'specialization clinicName additionalDegrees', populate: { path: 'userId', select: 'name _id' } }
     ]);
 
     // Notifikasi berdasarkan siapa yang ubah status dan ke siapa
@@ -256,7 +256,7 @@ const updateAppointmentStatus = async (req, res) => {
 const getAppointmentById = async (req, res) => {
   try {
     const appointment = await Appointment.findById(req.params.id)
-      .populate('patientId', 'name email phone avatar')
+      .populate('patientId', 'name email phone avatar dateOfBirth gender bloodType allergies')
       .populate({
         path: 'doctorId',
         select: 'specialization clinicName consultationFee',

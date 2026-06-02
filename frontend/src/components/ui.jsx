@@ -21,6 +21,8 @@ export const Icon = ({ name, size = 20, stroke = 1.6, className, style }) => {
     case 'chevron-r': return P(<path d="m9 6 6 6-6 6"/>);
     case 'chevron-l': return P(<path d="m15 6-6 6 6 6"/>);
     case 'chevron-d': return P(<path d="m6 9 6 6 6-6"/>);
+    case 'chevron-u': return P(<path d="m18 15-6-6-6 6"/>);
+    case 'menu': return P(<path d="M4 6h16M4 12h16M4 18h16"/>);
     case 'plus': return P(<path d="M12 5v14M5 12h14"/>);
     case 'check': return P(<path d="m5 12 5 5L20 7"/>);
     case 'x': return P(<path d="m6 6 12 12M18 6 6 18"/>);

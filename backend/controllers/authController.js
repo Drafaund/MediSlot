@@ -124,4 +124,31 @@ const getMe = async (req, res) => {
   }
 };
 
-module.exports = { register, login, googleAuth, googleCallback, googleCallbackMiddleware, getMe };
+// @desc  Update patient profile (nama, telepon, tanggal lahir, gender, gol. darah, alergi)
+// @route PUT /api/auth/profile
+// @access Private
+const updateProfile = async (req, res) => {
+  try {
+    const { name, phone, dateOfBirth, gender, bloodType, allergies } = req.body;
+
+    const allowed = {};
+    if (name)        allowed.name        = name.trim();
+    if (phone !== undefined) allowed.phone = phone;
+    if (dateOfBirth !== undefined) allowed.dateOfBirth = dateOfBirth || null;
+    if (gender !== undefined)      allowed.gender      = gender;
+    if (bloodType !== undefined)   allowed.bloodType   = bloodType;
+    if (allergies !== undefined)   allowed.allergies   = Array.isArray(allergies) ? allergies.filter(Boolean) : [];
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      allowed,
+      { new: true, runValidators: true }
+    );
+
+    res.json({ success: true, data: user, message: 'Profil berhasil diperbarui' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+module.exports = { register, login, googleAuth, googleCallback, googleCallbackMiddleware, getMe, updateProfile };

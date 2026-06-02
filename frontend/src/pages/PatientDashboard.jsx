@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { getDoctorDisplayName } from '../utils/doctorName';
 import { Icon, Card, Badge, Avatar, Btn, Empty, Toast } from '../components/ui';
 
 const statusBadge = (status) => {
@@ -69,7 +70,9 @@ const PatientDashboard = () => {
           <div className="msStack-sm">
             {upcoming.map(a => {
               const d = a.doctorId;
-              const initials = d?.name?.split(' ').map(x => x[0]).slice(0, 2).join('') || 'Dr';
+              const baseName = d?.userId?.name || d?.name || '';
+              const initials = baseName.split(' ').map(x => x[0]).slice(0, 2).join('') || 'Dr';
+              const fullName = getDoctorDisplayName(d);
               return (
                 <Card key={a._id}>
                   <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start' }}>
@@ -99,7 +102,7 @@ const PatientDashboard = () => {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
                         <Avatar initials={initials} color="sage" size={36}/>
                         <div>
-                          <div style={{ fontWeight: 600 }}>{d?.name || 'Dokter'}</div>
+                          <div style={{ fontWeight: 600 }}>{fullName}</div>
                           <div style={{ color: 'var(--muted)', fontSize: 13 }}>{d?.specialization} · {d?.clinicName}</div>
                         </div>
                       </div>
@@ -139,13 +142,14 @@ const PatientDashboard = () => {
           <div className="msStack-sm">
             {past.map(a => {
               const d = a.doctorId;
-              const initials = d?.name?.split(' ').map(x => x[0]).slice(0, 2).join('') || 'Dr';
+              const baseName2 = d?.userId?.name || d?.name || '';
+              const initials = baseName2.split(' ').map(x => x[0]).slice(0, 2).join('') || 'Dr';
               return (
                 <Card key={a._id} hover onClick={() => navigate('/medical-history')}>
                   <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
                     <Avatar initials={initials} color="sage" size={44}/>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: 600 }}>{d?.name || 'Dokter'}</div>
+                      <div style={{ fontWeight: 600 }}>{getDoctorDisplayName(d)}</div>
                       <div style={{ color: 'var(--muted)', fontSize: 13, marginTop: 2 }}>
                         {formatDate(a.date)} · {a.timeSlot} · {d?.clinicName}
                       </div>

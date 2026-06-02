@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { Icon, Card, Badge, Avatar, Btn, SectionHeader, DoctorCard } from '../components/ui';
+import { formatDoctorName } from '../utils/doctorName';
 
 const QUICK_ACTIONS = [
   { icon: 'stetho', label: 'Cari dokter', sub: 'Temukan spesialis terbaik', path: '/doctors' },
@@ -141,7 +142,12 @@ const Home = () => {
           />
           <div className="msGrid-2">
             {topDoctors.map(d => (
-              <DoctorCard key={d._id} d={{ ...d, name: d.userId?.name || 'Dokter', initials: d.userId?.name?.split(' ').map(x => x[0]).slice(0, 2).join('') || 'Dr', color: 'sage', specLabel: d.specialization, clinic: d.clinicName, fee: d.consultationFee, bpjs: d.acceptBPJS, experience: d.yearsOfExperience || 0 }} onClick={() => navigate(`/doctors/${d._id}`)}/>
+              <DoctorCard key={d._id} d={{ ...d,
+                name: formatDoctorName(d.userId?.name || '', d.specialization, d.additionalDegrees),
+                initials: d.userId?.name?.split(' ').map(x => x[0]).slice(0, 2).join('') || 'Dr',
+                color: 'sage', specLabel: d.specialization, clinic: d.clinicName,
+                fee: d.consultationFee, bpjs: d.acceptBPJS, experience: d.yearsOfExperience || 0
+              }} onClick={() => navigate(`/doctors/${d._id}`)}/>
             ))}
           </div>
         </div>

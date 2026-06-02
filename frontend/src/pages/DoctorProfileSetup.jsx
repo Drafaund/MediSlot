@@ -4,10 +4,10 @@ import api from '../services/api';
 import { Icon, Card, Btn, Input, Textarea, Toast } from '../components/ui';
 
 const SPECIALIZATIONS = [
-  'Penyakit Dalam', 'Anak', 'Obstetri & Ginekologi', 'Bedah Umum',
-  'Jantung & Pembuluh Darah', 'Saraf', 'Mata', 'THT',
-  'Kulit & Kelamin', 'Ortopedi', 'Urologi', 'Psikiatri',
-  'Paru', 'Gigi & Mulut', 'Umum',
+  'Dokter Umum', 'Penyakit Dalam', 'Anak', 'Kandungan',
+  'Bedah Umum', 'Jantung & Pembuluh Darah', 'Saraf', 'Mata',
+  'THT', 'Kulit & Kelamin', 'Ortopedi', 'Urologi',
+  'Psikiatri', 'Paru', 'Gigi & Mulut',
 ];
 
 const DoctorProfileSetup = () => {
@@ -28,7 +28,9 @@ const DoctorProfileSetup = () => {
     yearsOfExperience: '',
     acceptBPJS: false,
     bio: '',
+    additionalDegrees: [],
   });
+  const [degreeInput, setDegreeInput] = useState('');
 
   useEffect(() => {
     api.get('/doctors/my-profile')
@@ -45,6 +47,7 @@ const DoctorProfileSetup = () => {
             yearsOfExperience: p.yearsOfExperience != null ? p.yearsOfExperience.toString() : '',
             acceptBPJS: p.acceptBPJS || false,
             bio: p.bio || '',
+            additionalDegrees: p.additionalDegrees || [],
           });
           setIsEdit(true);
         }
@@ -170,6 +173,49 @@ const DoctorProfileSetup = () => {
             </label>
           </div>
         </div>
+      </Card>
+
+      <Card>
+        <div style={{ fontFamily: 'var(--serif)', fontSize: 17, marginBottom: 8 }}>Gelar tambahan</div>
+        <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 14 }}>
+          Sub-spesialis, gelar akademik, atau sertifikasi lain (contoh: M.Kes, Ph.D, Sp.PD-KEMD).
+        </div>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+          <input
+            value={degreeInput}
+            onChange={e => setDegreeInput(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                const val = degreeInput.trim();
+                if (val && !form.additionalDegrees.includes(val)) {
+                  set('additionalDegrees', [...form.additionalDegrees, val]);
+                }
+                setDegreeInput('');
+              }
+            }}
+            placeholder="Contoh: Sp.PD-KEMD, M.Kes…"
+            style={{ flex: 1, border: '1px solid var(--border)', borderRadius: 8, padding: '9px 12px', fontSize: 14, background: 'var(--paper)', outline: 'none' }}
+          />
+          <button type="button" onClick={() => {
+            const val = degreeInput.trim();
+            if (val && !form.additionalDegrees.includes(val)) set('additionalDegrees', [...form.additionalDegrees, val]);
+            setDegreeInput('');
+          }} style={{ padding: '9px 16px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--paper)', cursor: 'pointer', fontSize: 13 }}>
+            Tambah
+          </button>
+        </div>
+        {form.additionalDegrees.length > 0 && (
+          <div className="msChip-row">
+            {form.additionalDegrees.map(d => (
+              <span key={d} className="msChip msChip-active" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                {d}
+                <button type="button" onClick={() => set('additionalDegrees', form.additionalDegrees.filter(x => x !== d))}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'inherit', fontSize: 14 }}>×</button>
+              </span>
+            ))}
+          </div>
+        )}
       </Card>
 
       <Card>

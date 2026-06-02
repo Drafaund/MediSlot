@@ -77,13 +77,15 @@ const NotifPanel = ({ notifs, unread, onMarkAll, onMarkOne, onClose }) => (
   </div>
 );
 
-const TopBar = () => {
-  const { user } = useAuth();
+const TopBar = ({ onToggle }) => {
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [notifs, setNotifs] = useState([]);
   const [unread, setUnread] = useState(0);
   const [open, setOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const panelRef = useRef(null);
+  const profileRef = useRef(null);
 
   const fetchNotifs = useCallback(async () => {
     if (!user) return;
@@ -105,6 +107,7 @@ const TopBar = () => {
   useEffect(() => {
     const handler = (e) => {
       if (panelRef.current && !panelRef.current.contains(e.target)) setOpen(false);
+      if (profileRef.current && !profileRef.current.contains(e.target)) setProfileOpen(false);
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
@@ -134,6 +137,11 @@ const TopBar = () => {
 
   return (
     <div className="msTopbar">
+      {/* Hamburger — hanya tampil di mobile via CSS */}
+      <button className="msHamburger msIcon-btn msIcon-btn-lg" onClick={onToggle} aria-label="Buka menu">
+        <Icon name="menu" size={18}/>
+      </button>
+
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 14 }}>
         {user.role === 'patient' && (
           <button className="msTopbar-search" onClick={() => navigate('/doctors')}>
@@ -184,16 +192,78 @@ const TopBar = () => {
           )}
         </div>
 
-        <button className="msIcon-btn msIcon-btn-lg" onClick={() => navigate(user.role === 'patient' ? '/dashboard' : `/${user.role}/dashboard`)}>
-          <Icon name="settings" size={16}/>
-        </button>
-        <div style={{ width: 1, height: 22, background: 'var(--border)', margin: '0 6px' }}/>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <Avatar initials={initials} color={color} size={34}/>
-          <div style={{ fontSize: 13 }}>
-            <div style={{ fontWeight: 600 }}>{user.name?.split(' ').slice(0, 2).join(' ')}</div>
-            <div style={{ fontSize: 11, color: 'var(--muted)' }}>{subLabel}</div>
-          </div>
+        <div style={{ width: 1, height: 22, background: 'var(--border)', margin: '0 4px' }}/>
+
+        {/* Avatar + dropdown */}
+        <div ref={profileRef} style={{ position: 'relative' }}>
+          <button
+            onClick={() => setProfileOpen(o => !o)}
+            style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'none', border: 'none', cursor: 'pointer', padding: '6px 8px', borderRadius: 10, transition: 'background 0.15s' }}
+            onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-2)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'none'}
+          >
+            <Avatar initials={initials} color={color} size={34}/>
+            <div style={{ fontSize: 13, textAlign: 'left' }}>
+              <div style={{ fontWeight: 600 }}>{user.name?.split(' ').slice(0, 2).join(' ')}</div>
+              <div style={{ fontSize: 11, color: 'var(--muted)' }}>{subLabel}</div>
+            </div>
+            <Icon name="chevron-d" size={13} style={{ color: 'var(--muted)', marginLeft: 2 }}/>
+          </button>
+
+          {profileOpen && (
+            <div style={{
+              position: 'absolute', top: 'calc(100% + 8px)', right: 0, width: 220, zIndex: 200,
+              background: 'var(--paper)', border: '1px solid var(--border)',
+              borderRadius: 12, boxShadow: '0 8px 24px rgba(0,0,0,0.10)',
+              overflow: 'hidden',
+            }}>
+              {/* Header */}
+              <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)' }}>
+                <div style={{ fontWeight: 600, fontSize: 14 }}>{user.name}</div>
+                <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>{user.email}</div>
+              </div>
+
+              {/* Menu items */}
+              <div style={{ padding: '6px 0' }}>
+                {user.role === 'patient' && (
+                  <button onClick={() => { setProfileOpen(false); navigate('/profile'); }}
+                    style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '9px 16px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: 'var(--ink-2)', transition: 'background 0.12s' }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-2)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                    <Icon name="user" size={15}/>
+                    Profil Saya
+                  </button>
+                )}
+                {user.role === 'doctor' && (
+                  <button onClick={() => { setProfileOpen(false); navigate('/doctor/profile'); }}
+                    style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '9px 16px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: 'var(--ink-2)', transition: 'background 0.12s' }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-2)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                    <Icon name="user" size={15}/>
+                    Profil Dokter
+                  </button>
+                )}
+                <button onClick={() => { setProfileOpen(false); navigate(user.role === 'patient' ? '/dashboard' : `/${user.role}/dashboard`); }}
+                  style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '9px 16px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: 'var(--ink-2)', transition: 'background 0.12s' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-2)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                  <Icon name="settings" size={15}/>
+                  Dashboard
+                </button>
+              </div>
+
+              {/* Logout */}
+              <div style={{ padding: '6px 0', borderTop: '1px solid var(--border)' }}>
+                <button onClick={() => { setProfileOpen(false); logout(); navigate('/login'); }}
+                  style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '9px 16px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: 'var(--warn)', transition: 'background 0.12s' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-2)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                  <Icon name="logout" size={15}/>
+                  Keluar
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

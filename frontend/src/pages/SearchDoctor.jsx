@@ -2,18 +2,24 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../services/api';
 import { Icon, Card, Btn, Input, Select, Empty, DoctorCard } from '../components/ui';
+import { formatDoctorName } from '../utils/doctorName';
 
 const SPECIALIZATIONS = [
-  { value: 'Dokter Umum', label: 'Dokter Umum' },
-  { value: 'Penyakit Dalam', label: 'Penyakit Dalam (Sp.PD)' },
-  { value: 'Anak', label: 'Anak (Sp.A)' },
-  { value: 'Kandungan', label: 'Kandungan (Sp.OG)' },
-  { value: 'Jantung', label: 'Jantung (Sp.JP)' },
-  { value: 'Kulit', label: 'Kulit & Kelamin (Sp.KK)' },
-  { value: 'Mata', label: 'Mata (Sp.M)' },
-  { value: 'THT', label: 'THT (Sp.THT)' },
-  { value: 'Jiwa', label: 'Kesehatan Jiwa (Sp.KJ)' },
-  { value: 'Gigi', label: 'Gigi (drg.)' },
+  { value: 'Dokter Umum',           label: 'Dokter Umum' },
+  { value: 'Penyakit Dalam',        label: 'Penyakit Dalam (Sp.PD)' },
+  { value: 'Anak',                  label: 'Anak (Sp.A)' },
+  { value: 'Kandungan',             label: 'Kandungan (Sp.OG)' },
+  { value: 'Bedah Umum',            label: 'Bedah Umum (Sp.B)' },
+  { value: 'Jantung & Pembuluh Darah', label: 'Jantung (Sp.JP)' },
+  { value: 'Saraf',                 label: 'Saraf (Sp.S)' },
+  { value: 'Mata',                  label: 'Mata (Sp.M)' },
+  { value: 'THT',                   label: 'THT (Sp.THT)' },
+  { value: 'Kulit & Kelamin',       label: 'Kulit & Kelamin (Sp.KK)' },
+  { value: 'Ortopedi',              label: 'Ortopedi (Sp.OT)' },
+  { value: 'Urologi',               label: 'Urologi (Sp.U)' },
+  { value: 'Psikiatri',             label: 'Psikiatri (Sp.KJ)' },
+  { value: 'Paru',                  label: 'Paru (Sp.P)' },
+  { value: 'Gigi & Mulut',          label: 'Gigi & Mulut (drg.)' },
 ];
 
 const CITIES = ['Jakarta', 'Bandung', 'Surabaya', 'Yogyakarta', 'Semarang', 'Medan', 'Tangerang'];
@@ -121,17 +127,20 @@ const SearchDoctor = () => {
     return 0;
   });
 
-  const mapDoctor = (d) => ({
+  const mapDoctor = (d) => {
+    const baseName = d.userId?.name || '';
+    const fullName = formatDoctorName(baseName, d.specialization, d.additionalDegrees);
+    return ({
     ...d,
-    name: d.userId?.name || 'Dokter',
-    initials: d.userId?.name?.split(' ').map(x => x[0]).slice(0, 2).join('') || 'Dr',
+    name: fullName,
+    initials: baseName.split(' ').map(x => x[0]).slice(0, 2).join('') || 'Dr',
     color: 'sage',
     specLabel: d.specialization,
     clinic: d.clinicName,
     fee: d.consultationFee || 0,
     bpjs: d.acceptBPJS,
     experience: d.yearsOfExperience || 0,
-  });
+  });};
 
   return (
     <div className="msStack-md">
@@ -141,7 +150,7 @@ const SearchDoctor = () => {
       </div>
 
       <Card>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr auto', gap: 12 }}>
+        <div className="msSearch-filter">
           <Input icon="search" placeholder="Nama dokter, spesialisasi, atau klinik…" value={q} onChange={handleSearchChange}/>
           <Select value={specialization} onChange={v => { setSpecialization(v); applyAndFetch(buildParams({ specialization: v })); }}
             placeholder="Semua spesialisasi" options={SPECIALIZATIONS}/>
@@ -178,7 +187,7 @@ const SearchDoctor = () => {
           </div>
           <Btn variant="secondary" icon="filter" onClick={() => applyAndFetch(buildParams())}>Filter</Btn>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
+        <div className="msSearch-filter-sub">
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <label className="msToggle">
               <input type="checkbox" checked={bpjsOnly} onChange={e => { setBpjsOnly(e.target.checked); applyAndFetch(buildParams({ acceptBPJS: e.target.checked })); }}/>

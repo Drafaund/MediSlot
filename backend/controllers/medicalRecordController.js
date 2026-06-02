@@ -90,8 +90,8 @@ const createMedicalRecord = async (req, res) => {
     });
 
     const populated = await record.populate([
-      { path: 'patientId', select: 'name email phone avatar' },
-      { path: 'doctorId', select: 'specialization clinicName', populate: { path: 'userId', select: 'name avatar' } },
+      { path: 'patientId', select: 'name email phone avatar dateOfBirth gender bloodType allergies' },
+      { path: 'doctorId', select: 'specialization clinicName additionalDegrees', populate: { path: 'userId', select: 'name avatar' } },
       { path: 'appointmentId', select: 'date timeSlot queueNumber' }
     ]);
 
@@ -125,7 +125,7 @@ const getMyMedicalRecords = async (req, res) => {
       MedicalRecord.find(filter)
         .populate({
           path: 'doctorId',
-          select: 'specialization clinicName city',
+          select: 'specialization clinicName city additionalDegrees',
           populate: { path: 'userId', select: 'name avatar' }
         })
         .populate('appointmentId', 'date timeSlot queueNumber status')
@@ -208,10 +208,10 @@ const getPatientMedicalRecords = async (req, res) => {
 const getMedicalRecordById = async (req, res) => {
   try {
     const record = await MedicalRecord.findById(req.params.id)
-      .populate('patientId', 'name email phone avatar')
+      .populate('patientId', 'name email phone avatar dateOfBirth gender bloodType allergies')
       .populate({
         path: 'doctorId',
-        select: 'specialization clinicName clinicAddress consultationFee licenseNumber',
+        select: 'specialization clinicName clinicAddress consultationFee licenseNumber additionalDegrees',
         populate: { path: 'userId', select: 'name avatar' }
       })
       .populate('appointmentId', 'date timeSlot queueNumber status notes');

@@ -83,12 +83,12 @@ em { font-style: normal; color: var(--accent); }
 
 /* ─── App shell ───────────────────────────────────────────── */
 .msApp {
-  display: grid;
-  grid-template-columns: 260px 1fr;
+  display: flex;           /* flex agar sidebar bisa animate width */
   min-height: 100vh;
   background: var(--bg);
 }
 .msMain {
+  flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -102,6 +102,8 @@ em { font-style: normal; color: var(--accent); }
 
 /* Sidebar */
 .msSidebar {
+  width: 260px;
+  flex-shrink: 0;
   background: var(--paper);
   border-right: 1px solid var(--border);
   padding: 24px 16px;
@@ -111,7 +113,19 @@ em { font-style: normal; color: var(--accent); }
   position: sticky;
   top: 0;
   height: 100vh;
-  overflow-y: auto;
+  overflow: hidden;
+  /* Animasi saat toggle di desktop */
+  transition: width 0.25s ease, padding 0.25s ease, border-color 0.25s ease;
+}
+
+/* Desktop: sidebar tersembunyi saat tidak ada ms-open */
+@media (min-width: 769px) {
+  .msSidebar:not(.ms-open) {
+    width: 0;
+    padding-left: 0;
+    padding-right: 0;
+    border-right-color: transparent;
+  }
 }
 .msSide-brand {
   display: flex;
@@ -948,4 +962,83 @@ em { font-style: normal; color: var(--accent); }
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 100px; border: 2px solid var(--bg); }
+
+/* ─── Hamburger button — selalu tampil ─────────────────────── */
+.msHamburger { display: flex; }
+
+/* ─── Sidebar overlay — hanya muncul saat sidebar terbuka di mobile ── */
+.msSidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 299;
+  animation: msFadeIn 0.2s ease;
+}
+@keyframes msFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ─── Search filter grid ───────────────────────────────────── */
+.msSearch-filter {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr auto;
+  gap: 12px;
+}
+.msSearch-filter-sub {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* ─── Responsive: ≤ 768px ──────────────────────────────────── */
+@media (max-width: 768px) {
+  /* App layout sudah flex — tidak perlu override grid */
+
+  /* Sidebar: slide in from left as overlay */
+  .msSidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100dvh;
+    z-index: 300;
+    transform: translateX(-280px);
+    transition: transform 0.25s ease;
+    width: 260px;
+    box-shadow: none;
+  }
+  .msSidebar.ms-open {
+    transform: translateX(0);
+    box-shadow: 4px 0 32px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Overlay hanya muncul saat sidebar open DAN di mobile */
+  .msSidebar-overlay.ms-open { display: block; }
+
+  /* Hamburger sudah selalu tampil — tidak perlu override */
+
+  /* Reduce padding */
+  .msMain-body { padding: 20px 16px 80px; }
+  .msTopbar { padding: 12px 16px; }
+
+  /* Collapse grids to single column */
+  .msGrid-2,
+  .msGrid-3,
+  .msGrid-4 { grid-template-columns: 1fr; }
+
+  /* Search filter: stack vertically */
+  .msSearch-filter { grid-template-columns: 1fr; }
+  .msSearch-filter-sub { flex-direction: column; align-items: flex-start; }
+
+  /* Doctor detail: stack */
+  .msDoc-header-grid { flex-direction: column; }
+
+  /* Topbar search: hide text, smaller */
+  .msTopbar-search span:not(.msHero-kbd) { display: none; }
+  .msTopbar-search { min-width: 40px; max-width: 44px; padding: 0; justify-content: center; }
+  .msHero-kbd { display: none; }
+}
 ::-webkit-scrollbar-thumb:hover { background: var(--muted); }

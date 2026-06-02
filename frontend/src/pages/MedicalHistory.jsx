@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
 import { Icon, Card, Badge, Avatar, Btn, Empty } from '../components/ui';
+import { getDoctorDisplayName } from '../utils/doctorName';
 
 const MedicalHistory = () => {
   const [records, setRecords] = useState([]);
@@ -81,7 +82,8 @@ const MedicalHistory = () => {
         <div className="msTimeline">
           {records.map(r => {
             const d = r.doctorId;
-            const initials = d?.name?.split(' ').map(x => x[0]).slice(0, 2).join('') || 'Dr';
+            const baseName = d?.userId?.name || d?.name || '';
+            const initials = baseName.split(' ').map(x => x[0]).slice(0, 2).join('') || 'Dr';
             return (
               <button key={r._id} onClick={() => { setOpenId(r._id); setAiOpen(false); }}
                 className={`msTimeline-item ${openId === r._id && !aiOpen ? 'msTimeline-active' : ''}`}>
@@ -91,7 +93,7 @@ const MedicalHistory = () => {
                     {new Date(r.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
                   </div>
                   <div style={{ fontWeight: 600, fontSize: 14, marginTop: 2 }}>{r.diagnosis}</div>
-                  <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>{d?.name} · {r.clinicName}</div>
+                  <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>{getDoctorDisplayName(d)} · {r.clinicName}</div>
                 </div>
               </button>
             );
@@ -169,9 +171,9 @@ const MedicalHistory = () => {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 0', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
-              <Avatar initials={openRecord.doctorId?.name?.split(' ').map(x => x[0]).slice(0,2).join('') || 'Dr'} color="sage" size={44}/>
+              <Avatar initials={(openRecord.doctorId?.userId?.name || openRecord.doctorId?.name || '').split(' ').map(x => x[0]).slice(0,2).join('') || 'Dr'} color="sage" size={44}/>
               <div>
-                <div style={{ fontWeight: 600 }}>{openRecord.doctorId?.name || 'Dokter'}</div>
+                <div style={{ fontWeight: 600 }}>{getDoctorDisplayName(openRecord.doctorId)}</div>
                 <div style={{ color: 'var(--muted)', fontSize: 13 }}>{openRecord.clinicName}</div>
               </div>
             </div>

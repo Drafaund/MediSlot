@@ -1,5 +1,6 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { useState, useEffect } from 'react';
 import './index.css';
 
 import Sidebar from './components/Sidebar';
@@ -17,6 +18,7 @@ import DoctorDashboard from './pages/DoctorDashboard';
 import DoctorSchedule from './pages/DoctorSchedule';
 import DoctorRecord from './pages/DoctorRecord';
 import DoctorProfileSetup from './pages/DoctorProfileSetup';
+import PatientProfile from './pages/PatientProfile';
 import MedicalHistory from './pages/MedicalHistory';
 import SymptomChecker from './pages/SymptomChecker';
 import AdminVerify from './pages/AdminVerify';
@@ -35,12 +37,26 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 
 const AppShell = ({ children }) => {
   const { user } = useAuth();
+  const location = useLocation();
+  // Desktop: sidebar terbuka by default; Mobile: tertutup by default
+  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth > 768);
+
+  // Tutup sidebar saat navigasi — hanya di mobile
+  useEffect(() => {
+    if (window.innerWidth <= 768) setSidebarOpen(false);
+  }, [location.pathname]);
+
   if (!user) return children;
   return (
     <div className="msApp">
-      <Sidebar />
+      {/* Overlay gelap saat sidebar terbuka di mobile */}
+      <div
+        className={`msSidebar-overlay${sidebarOpen ? ' ms-open' : ''}`}
+        onClick={() => setSidebarOpen(false)}
+      />
+      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <main className="msMain">
-        <TopBar />
+        <TopBar onToggle={() => setSidebarOpen(o => !o)} />
         <div className="msMain-body">
           {children}
         </div>
@@ -79,6 +95,11 @@ const AppRoutes = () => {
       <Route path="/medical-history" element={
         <AppShell>
           <ProtectedRoute allowedRoles={['patient']}><MedicalHistory /></ProtectedRoute>
+        </AppShell>
+      } />
+      <Route path="/profile" element={
+        <AppShell>
+          <ProtectedRoute allowedRoles={['patient']}><PatientProfile /></ProtectedRoute>
         </AppShell>
       } />
 

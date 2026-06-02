@@ -1,6 +1,8 @@
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Icon, Logo, Avatar } from './ui';
+import api from '../services/api';
 
 const AVATAR_COLORS = { patient: 'mauve', doctor: 'sage', admin: 'ocean' };
 
@@ -18,16 +20,28 @@ const SIDEBAR_ITEMS = {
     { path: '/doctor/profile', icon: 'user', label: 'Profil Saya' },
   ],
   admin: [
-    { path: '/admin/verify', icon: 'shield', label: 'Verifikasi Dokter', badge: '3' },
+    { path: '/admin/verify', icon: 'shield', label: 'Verifikasi Dokter' },
     { path: '/admin/doctors', icon: 'stetho', label: 'Semua Dokter' },
     { path: '/admin/users', icon: 'users', label: 'Pengguna' },
   ],
 };
 
-const Sidebar = () => {
+const Sidebar = ({ open = false, onClose }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [pendingCount, setPendingCount] = useState(0);
+
+  // Fetch jumlah dokter pending verifikasi — hanya untuk admin
+  useEffect(() => {
+    if (user?.role !== 'admin') return;
+    api.get('/doctors/admin/all')
+      .then(({ data }) => {
+        const count = (data.data || []).filter(d => !d.isVerified).length;
+        setPendingCount(count);
+      })
+      .catch(() => {});
+  }, [user, location.pathname]); // refresh saat navigasi agar badge update setelah verifikasi
 
   if (!user) return null;
 
@@ -35,7 +49,6 @@ const Sidebar = () => {
   const items = SIDEBAR_ITEMS[role] || SIDEBAR_ITEMS.patient;
   const initials = user.name?.split(' ').map(x => x[0]).slice(0, 2).join('') || '??';
   const color = AVATAR_COLORS[role] || 'sage';
-
   const portalLabel = role === 'patient' ? 'Patient Portal' : role === 'doctor' ? 'Doctor Portal' : 'Admin Console';
 
   const isActive = (path) => {
@@ -43,8 +56,13 @@ const Sidebar = () => {
     return location.pathname.startsWith(path) && path !== '/';
   };
 
+  const getBadge = (path) => {
+    if (path === '/admin/verify' && pendingCount > 0) return String(pendingCount);
+    return null;
+  };
+
   return (
-    <aside className="msSidebar">
+    <aside className={`msSidebar${open ? ' ms-open' : ''}`}>
       <div className="msSide-brand">
         <Logo size={28}/>
         <div>
@@ -56,14 +74,17 @@ const Sidebar = () => {
       </div>
 
       <nav className="msSide-nav">
-        {items.map(it => (
-          <button key={it.path} onClick={() => navigate(it.path)}
-            className={`msSide-item ${isActive(it.path) ? 'msSide-item-active' : ''}`}>
-            <Icon name={it.icon} size={18}/>
-            <span style={{ flex: 1, textAlign: 'left' }}>{it.label}</span>
-            {it.badge && <span className="msSide-badge">{it.badge}</span>}
-          </button>
-        ))}
+        {items.map(it => {
+          const badge = getBadge(it.path);
+          return (
+            <button key={it.path} onClick={() => navigate(it.path)}
+              className={`msSide-item ${isActive(it.path) ? 'msSide-item-active' : ''}`}>
+              <Icon name={it.icon} size={18}/>
+              <span style={{ flex: 1, textAlign: 'left' }}>{it.label}</span>
+              {badge && <span className="msSide-badge">{badge}</span>}
+            </button>
+          );
+        })}
       </nav>
 
       <div className="msSide-foot">

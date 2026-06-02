@@ -35,7 +35,25 @@ const UserSchema = new mongoose.Schema({
   avatar: {
     type: String,
     default: ''
-  }
+  },
+  dateOfBirth: {
+    type: Date,
+    default: null
+  },
+  gender: {
+    type: String,
+    enum: ['Laki-laki', 'Perempuan', ''],
+    default: ''
+  },
+  bloodType: {
+    type: String,
+    enum: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', ''],
+    default: ''
+  },
+  allergies: [{
+    type: String,
+    trim: true
+  }]
 }, { timestamps: true });
 
 // Hash password sebelum disimpan

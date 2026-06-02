@@ -42,6 +42,16 @@ const DoctorDashboard = () => {
   const selected = appointments.find(a => a._id === selectedId);
   const patientInitials = (name) => name?.split(' ').map(x => x[0]).slice(0, 2).join('') || 'PS';
 
+  const calcAge = (dob) => {
+    if (!dob) return null;
+    const today = new Date();
+    const birth = new Date(dob);
+    let age = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+    return age;
+  };
+
   const updateStatus = async (id, newStatus) => {
     try {
       await api.put(`/appointments/${id}/status`, { status: newStatus });
@@ -117,7 +127,23 @@ const DoctorDashboard = () => {
                   <Avatar initials={patientInitials(selected.patientId?.name)} color="mauve" size={56}/>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 600, fontSize: 16 }}>{selected.patientId?.name || 'Pasien'}</div>
-                    <div style={{ color: 'var(--muted)', fontSize: 13 }}>{selected.patientId?.email}</div>
+                    <div style={{ color: 'var(--muted)', fontSize: 13 }}>
+                      {[selected.patientId?.gender, calcAge(selected.patientId?.dateOfBirth) != null ? `${calcAge(selected.patientId?.dateOfBirth)} tahun` : null].filter(Boolean).join(' · ') || selected.patientId?.email}
+                    </div>
+                    {selected.patientId?.bloodType && (
+                      <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
+                        Gol. darah: <strong>{selected.patientId.bloodType}</strong>
+                      </div>
+                    )}
+                    {selected.patientId?.allergies?.length > 0 && (
+                      <div style={{ marginTop: 6, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                        {selected.patientId.allergies.map(a => (
+                          <span key={a} style={{ padding: '1px 7px', borderRadius: 6, background: '#FEF3C7', color: '#92400E', fontSize: 11, fontWeight: 500 }}>
+                            ⚠ {a}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <div className="msEyebrow">Antrian</div>

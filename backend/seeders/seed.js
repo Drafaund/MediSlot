@@ -44,8 +44,10 @@ async function seed() {
 
   // ── Users ────────────────────────────────────────────────────────────────
   const users = await User.insertMany([
-    { name: 'Budi Santoso',    email: 'budi@test.com',  password: hashedPw, role: 'patient', phone: '081234567890' },
-    { name: 'Siti Rahma',      email: 'siti@test.com',  password: hashedPw, role: 'patient', phone: '081234567891' },
+    { name: 'Budi Santoso',    email: 'budi@test.com',  password: hashedPw, role: 'patient', phone: '081234567890',
+      dateOfBirth: new Date('1985-03-15'), gender: 'Laki-laki', bloodType: 'O+', allergies: ['Penisilin'] },
+    { name: 'Siti Rahma',      email: 'siti@test.com',  password: hashedPw, role: 'patient', phone: '081234567891',
+      dateOfBirth: new Date('1992-07-22'), gender: 'Perempuan', bloodType: 'A+', allergies: [] },
     { name: 'Dr. Ahmad Fauzi', email: 'ahmad@test.com', password: hashedPw, role: 'doctor',  phone: '081234567892' },
     { name: 'Dr. Dewi Kusuma', email: 'dewi@test.com',  password: hashedPw, role: 'doctor',  phone: '081234567893' },
     { name: 'Dr. Reza Pratama',email: 'reza@test.com',  password: hashedPw, role: 'doctor',  phone: '081234567894' },
@@ -66,6 +68,7 @@ async function seed() {
       consultationFee: 150000,
       acceptBPJS: true,
       bio: 'Dokter spesialis penyakit dalam dengan fokus pada diabetes, hipertensi, dan penyakit metabolik.',
+      additionalDegrees: ['M.Kes'],
       yearsOfExperience: 10,
       isVerified: true
     },
@@ -79,12 +82,13 @@ async function seed() {
       consultationFee: 125000,
       acceptBPJS: true,
       bio: 'Dokter spesialis anak dengan fokus pada tumbuh kembang anak dan penyakit infeksi pada anak.',
+      additionalDegrees: [],
       yearsOfExperience: 8,
       isVerified: true
     },
     {
       userId: reza._id,
-      specialization: 'Obstetri & Ginekologi',
+      specialization: 'Kandungan',
       licenseNumber: 'STR-OG-2024-003',
       clinicName: 'Klinik Pratama Bunda',
       clinicAddress: 'Jl. Parangtritis No. 88, Yogyakarta',
@@ -92,6 +96,7 @@ async function seed() {
       consultationFee: 175000,
       acceptBPJS: false,
       bio: 'Dokter spesialis kebidanan dan kandungan. Melayani pemeriksaan kehamilan, USG, dan konsultasi kesehatan reproduksi wanita.',
+      additionalDegrees: ['M.Biomed'],
       yearsOfExperience: 7,
       isVerified: true
     }

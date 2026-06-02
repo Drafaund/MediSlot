@@ -78,6 +78,17 @@ const DoctorRecord = () => {
   const patientName = patient?.name || 'Pasien';
   const patientInitials = patientName.split(' ').map(x => x[0]).slice(0, 2).join('');
 
+  const calcAge = (dob) => {
+    if (!dob) return null;
+    const today = new Date();
+    const birth = new Date(dob);
+    let age = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+    return age;
+  };
+  const patientAge = calcAge(patient?.dateOfBirth);
+
   return (
     <div className="msStack-md" style={{ maxWidth: 1080 }}>
       <button className="msBack" onClick={() => navigate('/doctor/dashboard')}>
@@ -191,9 +202,36 @@ const DoctorRecord = () => {
               <Avatar initials={patientInitials} color="mauve" size={44}/>
               <div>
                 <div style={{ fontWeight: 600 }}>{patientName}</div>
-                <div style={{ fontSize: 13, color: 'var(--muted)' }}>{patient?.email}</div>
+                <div style={{ fontSize: 13, color: 'var(--muted)' }}>
+                  {[patient?.gender, patientAge != null ? `${patientAge} tahun` : null].filter(Boolean).join(' · ') || patient?.email}
+                </div>
               </div>
             </div>
+
+            {/* Info medis pasien */}
+            {(patient?.bloodType || patient?.allergies?.length > 0) && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
+                {patient?.bloodType && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+                    <span style={{ color: 'var(--muted)' }}>Golongan darah</span>
+                    <strong style={{ fontFamily: 'var(--mono)' }}>{patient.bloodType}</strong>
+                  </div>
+                )}
+                {patient?.allergies?.length > 0 && (
+                  <div>
+                    <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 4 }}>Alergi</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                      {patient.allergies.map(a => (
+                        <span key={a} style={{ padding: '2px 8px', borderRadius: 6, background: '#FEF3C7', color: '#92400E', fontSize: 12, fontWeight: 500 }}>
+                          ⚠ {a}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {appointment && (
               <div style={{ marginTop: 12 }}>
                 <div className="msEyebrow">Appointment</div>
