@@ -222,4 +222,41 @@ const updateAppointmentStatus = async (req, res) => {
   }
 };
 
-module.exports = { createAppointment, getMyAppointments, getDoctorAppointments, updateAppointmentStatus };
+// @desc  Get single appointment by ID
+// @route GET /api/appointments/:id
+// @access Private (patient bersangkutan atau dokter yang menangani)
+const getAppointmentById = async (req, res) => {
+  try {
+    const appointment = await Appointment.findById(req.params.id)
+      .populate('patientId', 'name email phone avatar')
+      .populate({
+        path: 'doctorId',
+        select: 'specialization clinicName consultationFee',
+        populate: { path: 'userId', select: 'name avatar' }
+      });
+
+    if (!appointment) {
+      return res.status(404).json({ success: false, message: 'Appointment tidak ditemukan' });
+    }
+
+    // Pasien hanya bisa lihat appointment miliknya
+    if (req.user.role === 'patient' && appointment.patientId._id.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Akses ditolak' });
+    }
+
+    // Dokter hanya bisa lihat appointment miliknya
+    if (req.user.role === 'doctor') {
+      const DoctorProfile = require('../models/DoctorProfile');
+      const profile = await DoctorProfile.findOne({ userId: req.user._id });
+      if (!profile || appointment.doctorId._id.toString() !== profile._id.toString()) {
+        return res.status(403).json({ success: false, message: 'Akses ditolak' });
+      }
+    }
+
+    res.json({ success: true, data: appointment });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+module.exports = { createAppointment, getMyAppointments, getDoctorAppointments, updateAppointmentStatus, getAppointmentById };

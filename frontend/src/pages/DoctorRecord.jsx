@@ -12,6 +12,8 @@ const DoctorRecord = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [history, setHistory] = useState([]);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [form, setForm] = useState({
     chiefComplaint: '', diagnosis: '', symptoms: [],
     bp: '120/80', hr: '78', temp: '36.7', weight: '', height: '',
@@ -25,6 +27,14 @@ const DoctorRecord = () => {
         const appt = data.data;
         setAppointment(appt);
         setForm(prev => ({ ...prev, chiefComplaint: appt.notes || '' }));
+
+        // Fetch riwayat rekam medis pasien yang dibuat oleh dokter ini
+        const patientId = appt.patientId?._id || appt.patientId;
+        if (patientId) {
+          api.get(`/medical-records/patient/${patientId}`)
+            .then(r => setHistory(r.data.data || []))
+            .catch(() => { /* pasien belum pernah ditangani, tidak ada riwayat */ });
+        }
       })
       .catch(() => { /* use empty form */ })
       .finally(() => setLoading(false));
@@ -195,6 +205,56 @@ const DoctorRecord = () => {
                     {appointment.notes}
                   </div>
                 )}
+              </div>
+            )}
+          </Card>
+
+          {/* Panel riwayat rekam medis pasien dari dokter ini */}
+          <Card padded={false}>
+            <button
+              onClick={() => setHistoryOpen(o => !o)}
+              style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Icon name="file" size={15} style={{ color: 'var(--accent)' }}/>
+                <span className="msEyebrow" style={{ color: 'var(--accent)' }}>
+                  Riwayat kunjungan Anda ({history.length})
+                </span>
+              </div>
+              <Icon name={historyOpen ? 'chevron-u' : 'chevron-d'} size={14} style={{ color: 'var(--muted)' }}/>
+            </button>
+
+            {historyOpen && (
+              <div style={{ borderTop: '1px solid var(--border)' }}>
+                {history.length === 0 ? (
+                  <div style={{ padding: '14px 18px', fontSize: 13, color: 'var(--muted)' }}>
+                    Belum ada riwayat kunjungan sebelumnya.
+                  </div>
+                ) : history.map((rec, i) => (
+                  <div key={rec._id} style={{
+                    padding: '12px 18px',
+                    borderTop: i ? '1px solid var(--border)' : 'none',
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
+                      <span style={{ fontSize: 12, color: 'var(--muted)' }}>
+                        {new Date(rec.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </span>
+                    </div>
+                    <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 2 }}>{rec.diagnosis}</div>
+                    {rec.chiefComplaint && (
+                      <div style={{ fontSize: 12, color: 'var(--ink-2)' }}>Keluhan: {rec.chiefComplaint}</div>
+                    )}
+                    {rec.prescription?.length > 0 && (
+                      <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>
+                        💊 {rec.prescription.map(p => p.name).join(', ')}
+                      </div>
+                    )}
+                    {rec.vitalSigns?.bloodPressure && (
+                      <div style={{ fontSize: 12, color: 'var(--muted)' }}>
+                        TD: {rec.vitalSigns.bloodPressure}
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
             )}
           </Card>

@@ -1,5 +1,5 @@
 const MedicalRecord = require('../models/MedicalRecord');
-const Appointment = require('../models/Appointment');
+const Appointment   = require('../models/Appointment');
 const DoctorProfile = require('../models/DoctorProfile');
 
 // Helper: ambil DoctorProfile dari userId, lempar error jika tidak ada
@@ -140,7 +140,7 @@ const getMyMedicalRecords = async (req, res) => {
   }
 };
 
-// @desc  Dokter lihat semua rekam medis pasien tertentu yang pernah ditanganinya
+// @desc  Dokter lihat rekam medis yang DIA buat untuk pasien tertentu
 // @route GET /api/medical-records/patient/:patientId
 // @access Private (doctor)
 const getPatientMedicalRecords = async (req, res) => {
@@ -150,27 +150,26 @@ const getPatientMedicalRecords = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Profil dokter tidak ditemukan' });
     }
 
-    // Validasi: dokter pernah menangani pasien ini minimal sekali
-    const everTreated = await MedicalRecord.exists({
+    // Akses diizinkan jika dokter punya appointment (status apapun) dengan pasien ini
+    const hasAppointment = await Appointment.exists({
       doctorId: doctorProfile._id,
       patientId: req.params.patientId
     });
-    if (!everTreated) {
+    if (!hasAppointment) {
       return res.status(403).json({ success: false, message: 'Akses ditolak — pasien ini belum pernah Anda tangani' });
     }
 
     const { page = 1, limit = 10 } = req.query;
     const skip = (Number(page) - 1) * Number(limit);
 
-    const filter = { patientId: req.params.patientId };
+    // Hanya rekam medis yang dibuat oleh dokter ini untuk pasien ini
+    const filter = {
+      patientId: req.params.patientId,
+      doctorId: doctorProfile._id
+    };
 
     const [records, total] = await Promise.all([
       MedicalRecord.find(filter)
-        .populate({
-          path: 'doctorId',
-          select: 'specialization clinicName',
-          populate: { path: 'userId', select: 'name avatar' }
-        })
         .populate('appointmentId', 'date timeSlot status')
         .sort({ date: -1 })
         .skip(skip)
