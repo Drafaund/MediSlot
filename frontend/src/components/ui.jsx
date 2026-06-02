@@ -1,5 +1,23 @@
 import { useEffect } from 'react';
 
+const SPEC_EN = {
+  'Dokter Umum': 'General Practitioner',
+  'Penyakit Dalam': 'Internal Medicine',
+  'Anak': 'Pediatrics',
+  'Kandungan': 'Obstetrics & Gynecology',
+  'Bedah Umum': 'General Surgery',
+  'Jantung & Pembuluh Darah': 'Cardiology',
+  'Saraf': 'Neurology',
+  'Mata': 'Ophthalmology',
+  'THT': 'ENT',
+  'Kulit & Kelamin': 'Dermatology',
+  'Ortopedi': 'Orthopedics',
+  'Urologi': 'Urology',
+  'Psikiatri': 'Psychiatry',
+  'Paru': 'Pulmonology',
+  'Gigi & Mulut': 'Dentistry',
+};
+
 // ─── Icon set ────────────────────────────────────────────────────────────────
 export const Icon = ({ name, size = 20, stroke = 1.6, className, style }) => {
   const props = {
@@ -196,10 +214,10 @@ export const DoctorCard = ({ d, onClick }) => (
       <Avatar initials={d.initials || d.name?.split(' ').map(x => x[0]).slice(0,2).join('') || '??'} color={d.color || 'sage'} size={56}/>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ minWidth: 0 }}>
-          <div className="msDoctor-name">{d.name || 'Dokter'}</div>
+          <div className="msDoctor-name">{d.name || 'Doctor'}</div>
           <div className="msDoctor-spec">
-            {d.specLabel || d.specialization}
-            {d.experience > 0 && ` · ${d.experience} thn pengalaman`}
+            {SPEC_EN[d.specLabel || d.specialization] || d.specLabel || d.specialization}
+            {d.experience > 0 && ` · ${d.experience} yrs experience`}
           </div>
         </div>
         <div className="msDoctor-meta">
@@ -207,12 +225,12 @@ export const DoctorCard = ({ d, onClick }) => (
         </div>
         <div className="msDoctor-foot">
           <div className="msDoctor-fee">
-            <span style={{ color: 'var(--muted)', fontSize: 12 }}>Konsultasi</span>
+            <span style={{ color: 'var(--muted)', fontSize: 12 }}>Consultation</span>
             <span style={{ fontWeight: 600 }}>{formatIDR(d.fee || d.consultationFee || 0)}</span>
           </div>
           <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
             {(d.bpjs || d.acceptBPJS) && <Badge tone="sage" icon="shield">BPJS</Badge>}
-            <Badge tone="ink">Tersedia</Badge>
+            <Badge tone="ink">Available</Badge>
           </div>
         </div>
       </div>

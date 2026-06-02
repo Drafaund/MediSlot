@@ -16,7 +16,7 @@ const AdminVerify = () => {
         const { data } = await api.get('/doctors/admin/all');
         const all = data.data || [];
         setAllDoctors(all);
-        // Hanya tampilkan yang belum pernah ditinjau (bukan yang sudah ditolak)
+        // Only show those not yet reviewed (not rejected)
         const pending = all.filter(d => d.verificationStatus === 'pending');
         setDoctors(pending);
         if (pending.length > 0) setSelectedId(pending[0]._id);
@@ -32,30 +32,30 @@ const AdminVerify = () => {
     if (!selected) return;
     try {
       await api.put(`/doctors/${selected._id}/verify`, { isVerified: true });
-      const name = selected.userId?.name || selected.name || 'Dokter';
+      const name = selected.userId?.name || selected.name || 'Doctor';
       setDoctors(prev => prev.filter(d => d._id !== selectedId));
       setAllDoctors(prev => prev.map(d => d._id === selectedId ? { ...d, isVerified: true } : d));
-      setToast(`${name} berhasil diverifikasi`);
+      setToast(`${name} successfully verified`);
       const next = doctors.find(d => d._id !== selectedId);
       setSelectedId(next?._id || null);
     } catch {
-      setToast('Gagal memverifikasi dokter');
+      setToast('Failed to verify doctor');
     }
   };
 
   const handleReject = async () => {
     if (!selected) return;
-    const name = selected.userId?.name || selected.name || 'Dokter';
+    const name = selected.userId?.name || selected.name || 'Doctor';
     try {
-      // Panggil API agar notifikasi penolakan terkirim ke dokter
+      // Call API so rejection notification is sent to doctor
       await api.put(`/doctors/${selected._id}/verify`, { isVerified: false });
       setDoctors(prev => prev.filter(d => d._id !== selectedId));
       setAllDoctors(prev => prev.map(d => d._id === selectedId ? { ...d, isVerified: false } : d));
-      setToast(`Pendaftaran ${name} ditolak`);
+      setToast(`${name}'s registration rejected`);
       const next = doctors.find(d => d._id !== selectedId);
       setSelectedId(next?._id || null);
     } catch {
-      setToast('Gagal menolak pendaftaran');
+      setToast('Failed to reject registration');
     }
   };
 
@@ -69,22 +69,22 @@ const AdminVerify = () => {
   return (
     <div className="msStack-md">
       <div>
-        <div className="msEyebrow">Admin Panel · Verifikasi Dokter</div>
-        <h1 className="msPageTitle">Antrian verifikasi</h1>
+        <div className="msEyebrow">Admin Panel · Doctor Verification</div>
+        <h1 className="msPageTitle">Verification queue</h1>
         <p style={{ color: 'var(--muted)', marginTop: 6 }}>
-          Verifikasi pendaftaran dokter baru sebelum profil mereka aktif di platform
+          Verify new doctor registrations before their profiles go live on the platform
         </p>
       </div>
 
       <div className="msGrid-4">
-        <Stat label="Menunggu verifikasi" value={doctors.length} sub="Antrian saat ini" icon="clock" tone="accent"/>
-        <Stat label="Total dokter aktif" value={verified.length} sub="Di seluruh platform" icon="stetho"/>
-        <Stat label="Total terdaftar" value={allDoctors.length} sub="Semua status" icon="users"/>
-        <Stat label="Target verifikasi" value="<24j" sub="Per pendaftaran" icon="sparkles"/>
+        <Stat label="Pending verification" value={doctors.length} sub="Current queue" icon="clock" tone="accent"/>
+        <Stat label="Total active doctors" value={verified.length} sub="Across the platform" icon="stetho"/>
+        <Stat label="Total registered" value={allDoctors.length} sub="All statuses" icon="users"/>
+        <Stat label="Verification target" value="<24h" sub="Per registration" icon="sparkles"/>
       </div>
 
       <div className="msTabs">
-        {[['pending', `Menunggu (${doctors.length})`], ['verified', `Terverifikasi (${verified.length})`]].map(([v, l]) => (
+        {[['pending', `Pending (${doctors.length})`], ['verified', `Verified (${verified.length})`]].map(([v, l]) => (
           <button key={v} className={`msTab ${tab === v ? 'msTab-active' : ''}`} onClick={() => setTab(v)}>{l}</button>
         ))}
       </div>
@@ -95,12 +95,12 @@ const AdminVerify = () => {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.6fr', gap: 16 }}>
           <Card padded={false}>
             <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)' }}>
-              <div style={{ fontFamily: 'var(--serif)', fontSize: 17 }}>Antrian pendaftaran</div>
-              <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>Diurutkan dari terbaru</div>
+              <div style={{ fontFamily: 'var(--serif)', fontSize: 17 }}>Registration queue</div>
+              <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>Sorted by most recent</div>
             </div>
             {doctors.length === 0 ? (
               <div style={{ padding: 40, textAlign: 'center' }}>
-                <Empty icon="check-circ" title="Semua sudah diverifikasi!" sub="Tidak ada antrian pendaftaran"/>
+                <Empty icon="check-circ" title="All verified!" sub="No pending registrations"/>
               </div>
             ) : (
               <div>
@@ -110,7 +110,7 @@ const AdminVerify = () => {
                     <Avatar initials={getInitials(d)} color="ocean" size={40}/>
                     <div style={{ flex: 1, textAlign: 'left', minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <strong style={{ fontSize: 14 }}>{d.userId?.name || d.name || 'Dokter'}</strong>
+                        <strong style={{ fontSize: 14 }}>{d.userId?.name || d.name || 'Doctor'}</strong>
                         <Badge tone="neutral" size="sm">{d.specialization}</Badge>
                       </div>
                       <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -129,10 +129,10 @@ const AdminVerify = () => {
                 <Avatar initials={getInitials(selected)} color="ocean" size={64}/>
                 <div style={{ flex: 1 }}>
                   <div style={{ marginBottom: 4 }}>
-                    <Badge tone="amber" icon="clock">Menunggu verifikasi</Badge>
+                    <Badge tone="amber" icon="clock">Pending verification</Badge>
                   </div>
                   <h2 style={{ fontFamily: 'var(--serif)', fontSize: 26, fontWeight: 600, lineHeight: 1.1 }}>
-                    {selected.userId?.name || selected.name || 'Dokter'}
+                    {selected.userId?.name || selected.name || 'Doctor'}
                   </h2>
                   <div style={{ color: 'var(--muted)', marginTop: 4 }}>{selected.specialization} · {selected.clinicName}, {selected.city}</div>
                 </div>
@@ -140,14 +140,14 @@ const AdminVerify = () => {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 18 }}>
                 <div>
-                  <div className="msEyebrow">Nomor STR</div>
+                  <div className="msEyebrow">License Number (STR)</div>
                   <div style={{ marginTop: 6, fontFamily: 'var(--mono)', fontSize: 14 }}>{selected.licenseNumber || '—'}</div>
                 </div>
                 <div>
-                  <div className="msEyebrow">Status STR</div>
+                  <div className="msEyebrow">License Status</div>
                   <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 6, fontSize: 14 }}>
                     <Icon name="check-circ" size={14} style={{ color: 'var(--accent)' }}/>
-                    <span style={{ color: 'var(--accent)', fontWeight: 600 }}>Perlu verifikasi manual</span>
+                    <span style={{ color: 'var(--accent)', fontWeight: 600 }}>Requires manual verification</span>
                   </div>
                 </div>
                 <div>
@@ -155,7 +155,7 @@ const AdminVerify = () => {
                   <div style={{ marginTop: 6, fontSize: 14 }}>{selected.userId?.email || '—'}</div>
                 </div>
                 <div>
-                  <div className="msEyebrow">Spesialisasi</div>
+                  <div className="msEyebrow">Specialization</div>
                   <div style={{ marginTop: 6, fontSize: 14 }}>{selected.specialization}</div>
                 </div>
               </div>
@@ -171,22 +171,22 @@ const AdminVerify = () => {
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
                   <Icon name="info" size={16} style={{ color: 'var(--accent)', marginTop: 2, flexShrink: 0 }}/>
                   <div style={{ fontSize: 13, lineHeight: 1.55, color: 'var(--ink-2)' }}>
-                    Pastikan nama di STR sesuai dengan nama pendaftaran dan spesialisasi terdaftar valid sebelum memverifikasi.
+                    Ensure the name on the license matches the registration name and the registered specialization is valid before verifying.
                   </div>
                 </div>
               </div>
 
               <div style={{ display: 'flex', gap: 10, marginTop: 24, paddingTop: 18, borderTop: '1px solid var(--border)' }}>
-                <Btn variant="primary" icon="check" onClick={handleVerify}>Verifikasi & aktifkan</Btn>
-                <Btn variant="ghost" icon="x" onClick={handleReject}>Tolak pendaftaran</Btn>
+                <Btn variant="primary" icon="check" onClick={handleVerify}>Verify & activate</Btn>
+                <Btn variant="ghost" icon="x" onClick={handleReject}>Reject registration</Btn>
               </div>
             </Card>
-          ) : <Empty title="Tidak ada pendaftaran dipilih"/>}
+          ) : <Empty title="No registration selected"/>}
         </div>
       ) : (
         <Card padded={false}>
           {verified.length === 0 ? (
-            <Empty icon="stetho" title="Belum ada dokter terverifikasi"/>
+            <Empty icon="stetho" title="No verified doctors yet"/>
           ) : verified.map((d, i) => (
             <div key={d._id} style={{ padding: '14px 18px', borderTop: i ? '1px solid var(--border)' : 'none', display: 'flex', alignItems: 'center', gap: 14 }}>
               <Avatar initials={getInitials(d)} color="sage" size={36}/>
@@ -195,7 +195,7 @@ const AdminVerify = () => {
                 <div style={{ color: 'var(--muted)', fontSize: 12 }}>{d.specialization} · {d.clinicName} · {d.city}</div>
               </div>
               {d.licenseNumber && <span style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--muted)' }}>{d.licenseNumber}</span>}
-              <Badge tone="sage" icon="check-circ">Aktif</Badge>
+              <Badge tone="sage" icon="check-circ">Active</Badge>
             </div>
           ))}
         </Card>

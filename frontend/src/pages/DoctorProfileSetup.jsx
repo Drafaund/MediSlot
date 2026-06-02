@@ -52,7 +52,7 @@ const DoctorProfileSetup = () => {
           setIsEdit(true);
         }
       })
-      .catch(() => { /* profil belum ada, mode create */ })
+      .catch(() => { /* profile doesn't exist yet, create mode */ })
       .finally(() => setLoading(false));
   }, []);
 
@@ -60,7 +60,7 @@ const DoctorProfileSetup = () => {
 
   const handleSave = async () => {
     if (!form.specialization || !form.licenseNumber || !form.clinicName || !form.city) {
-      setToast('Spesialisasi, nomor STR, nama klinik, dan kota wajib diisi');
+      setToast('Specialization, license number, clinic name, and city are required');
       return;
     }
     setSaving(true);
@@ -77,9 +77,9 @@ const DoctorProfileSetup = () => {
         setIsEdit(true);
       }
       setSaved(true);
-      setToast('Profil berhasil disimpan');
+      setToast('Profile saved successfully');
     } catch (err) {
-      setToast(err.response?.data?.message || 'Gagal menyimpan profil');
+      setToast(err.response?.data?.message || 'Failed to save profile');
     } finally {
       setSaving(false);
     }
@@ -87,64 +87,64 @@ const DoctorProfileSetup = () => {
 
   if (loading) return (
     <div style={{ display: 'grid', placeItems: 'center', height: 300, color: 'var(--muted)' }}>
-      Memuat…
+      Loading…
     </div>
   );
 
   return (
     <div className="msStack-md" style={{ maxWidth: 780 }}>
       <div>
-        <div className="msEyebrow">{isEdit ? 'Edit Profil' : 'Setup Profil'}</div>
-        <h1 className="msPageTitle">{isEdit ? 'Perbarui profil praktik' : 'Lengkapi profil dokter'}</h1>
+        <div className="msEyebrow">{isEdit ? 'Edit Profile' : 'Profile Setup'}</div>
+        <h1 className="msPageTitle">{isEdit ? 'Update practice profile' : 'Complete doctor profile'}</h1>
         {!isEdit && (
           <p style={{ color: 'var(--muted)', marginTop: 6 }}>
-            Profil akan ditinjau admin sebelum muncul di pencarian pasien.
+            Your profile will be reviewed by admin before appearing in patient search.
           </p>
         )}
       </div>
 
-      {/* Banner verifikasi pending */}
+      {/* Pending verification banner */}
       {saved && !isEdit && (
         <div style={{ display: 'flex', gap: 12, padding: '14px 18px', background: 'var(--accent-soft)', borderRadius: 12, border: '1px solid var(--accent)' }}>
           <Icon name="info" size={18} style={{ color: 'var(--accent)', flexShrink: 0, marginTop: 1 }}/>
           <div>
-            <div style={{ fontWeight: 600, color: 'var(--accent)' }}>Profil menunggu verifikasi</div>
+            <div style={{ fontWeight: 600, color: 'var(--accent)' }}>Profile pending verification</div>
             <div style={{ fontSize: 13, color: 'var(--ink-2)', marginTop: 2 }}>
-              Admin akan meninjau profil Anda. Setelah diverifikasi, Anda akan muncul di pencarian pasien.
+              Admin will review your profile. Once verified, you will appear in patient search.
             </div>
           </div>
         </div>
       )}
 
       <Card>
-        <div style={{ fontFamily: 'var(--serif)', fontSize: 17, marginBottom: 16 }}>Informasi profesional</div>
+        <div style={{ fontFamily: 'var(--serif)', fontSize: 17, marginBottom: 16 }}>Professional information</div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
           <div>
-            <label className="msField-lbl">Spesialisasi *</label>
+            <label className="msField-lbl">Specialization *</label>
             <select value={form.specialization} onChange={e => set('specialization', e.target.value)}
               className="msPick" style={{ width: '100%', border: '1px solid var(--border)', marginTop: 6, background: 'var(--paper)', outline: 'none', borderRadius: 8, padding: '10px 12px', fontSize: 14 }}>
-              <option value="">— Pilih spesialisasi —</option>
+              <option value="">— Select specialization —</option>
               {SPECIALIZATIONS.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
-          <Input label="Nomor STR *" placeholder="STR-XX-2024-001" value={form.licenseNumber} onChange={v => set('licenseNumber', v)}/>
+          <Input label="License Number (STR) *" placeholder="STR-XX-2024-001" value={form.licenseNumber} onChange={v => set('licenseNumber', v)}/>
         </div>
       </Card>
 
       <Card>
-        <div style={{ fontFamily: 'var(--serif)', fontSize: 17, marginBottom: 16 }}>Informasi klinik</div>
+        <div style={{ fontFamily: 'var(--serif)', fontSize: 17, marginBottom: 16 }}>Clinic information</div>
         <div className="msStack-sm">
-          <Input label="Nama klinik *" placeholder="Klinik Pratama Sehat" value={form.clinicName} onChange={v => set('clinicName', v)}/>
-          <Input label="Alamat klinik" placeholder="Jl. Mangkubumi No. 12" value={form.clinicAddress} onChange={v => set('clinicAddress', v)}/>
-          <Input label="Kota *" placeholder="Yogyakarta" value={form.city} onChange={v => set('city', v)}/>
+          <Input label="Clinic name *" placeholder="Pratama Health Clinic" value={form.clinicName} onChange={v => set('clinicName', v)}/>
+          <Input label="Clinic address" placeholder="Jl. Mangkubumi No. 12" value={form.clinicAddress} onChange={v => set('clinicAddress', v)}/>
+          <Input label="City *" placeholder="Yogyakarta" value={form.city} onChange={v => set('city', v)}/>
         </div>
       </Card>
 
       <Card>
-        <div style={{ fontFamily: 'var(--serif)', fontSize: 17, marginBottom: 16 }}>Biaya & pembayaran</div>
+        <div style={{ fontFamily: 'var(--serif)', fontSize: 17, marginBottom: 16 }}>Fees & payment</div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, alignItems: 'start' }}>
           <div>
-            <label className="msField-lbl">Biaya konsultasi (Rp)</label>
+            <label className="msField-lbl">Consultation fee (Rp)</label>
             <div style={{ position: 'relative', marginTop: 6 }}>
               <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)', fontSize: 13 }}>Rp</span>
               <input type="number" min={0} placeholder="150000"
@@ -154,7 +154,7 @@ const DoctorProfileSetup = () => {
             </div>
           </div>
           <div>
-            <label className="msField-lbl">Pengalaman (tahun)</label>
+            <label className="msField-lbl">Experience (years)</label>
             <input type="number" min={0} max={60} placeholder="10"
               value={form.yearsOfExperience}
               onChange={e => set('yearsOfExperience', e.target.value)}
@@ -168,7 +168,7 @@ const DoctorProfileSetup = () => {
                 <span className="msToggle-track"/>
               </label>
               <span style={{ fontSize: 14, color: form.acceptBPJS ? 'var(--accent)' : 'var(--muted)' }}>
-                {form.acceptBPJS ? 'Menerima BPJS' : 'Tidak menerima BPJS'}
+                {form.acceptBPJS ? 'Accepts BPJS' : 'Does not accept BPJS'}
               </span>
             </label>
           </div>
@@ -176,9 +176,9 @@ const DoctorProfileSetup = () => {
       </Card>
 
       <Card>
-        <div style={{ fontFamily: 'var(--serif)', fontSize: 17, marginBottom: 8 }}>Gelar tambahan</div>
+        <div style={{ fontFamily: 'var(--serif)', fontSize: 17, marginBottom: 8 }}>Additional degrees</div>
         <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 14 }}>
-          Sub-spesialis, gelar akademik, atau sertifikasi lain (contoh: M.Kes, Ph.D, Sp.PD-KEMD).
+          Sub-specializations, academic degrees, or other certifications (e.g. M.Kes, Ph.D, Sp.PD-KEMD).
         </div>
         <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
           <input
@@ -194,7 +194,7 @@ const DoctorProfileSetup = () => {
                 setDegreeInput('');
               }
             }}
-            placeholder="Contoh: Sp.PD-KEMD, M.Kes…"
+            placeholder="Example: Sp.PD-KEMD, M.Kes…"
             style={{ flex: 1, border: '1px solid var(--border)', borderRadius: 8, padding: '9px 12px', fontSize: 14, background: 'var(--paper)', outline: 'none' }}
           />
           <button type="button" onClick={() => {
@@ -202,7 +202,7 @@ const DoctorProfileSetup = () => {
             if (val && !form.additionalDegrees.includes(val)) set('additionalDegrees', [...form.additionalDegrees, val]);
             setDegreeInput('');
           }} style={{ padding: '9px 16px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--paper)', cursor: 'pointer', fontSize: 13 }}>
-            Tambah
+            Add
           </button>
         </div>
         {form.additionalDegrees.length > 0 && (
@@ -219,28 +219,28 @@ const DoctorProfileSetup = () => {
       </Card>
 
       <Card>
-        <Textarea label="Bio / deskripsi singkat"
-          hint="Pengalaman, fokus praktik, atau hal yang ingin pasien tahu."
-          placeholder="Dokter spesialis penyakit dalam dengan pengalaman 10 tahun..."
+        <Textarea label="Bio / brief description"
+          hint="Experience, practice focus, or anything patients should know."
+          placeholder="Internal medicine specialist with 10 years of experience..."
           value={form.bio} onChange={v => set('bio', v)} rows={4}/>
       </Card>
 
       <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
         {isEdit && (
-          <Btn variant="ghost" onClick={() => navigate('/doctor/dashboard')}>Kembali ke dashboard</Btn>
+          <Btn variant="ghost" onClick={() => navigate('/doctor/dashboard')}>Back to dashboard</Btn>
         )}
         <Btn variant="primary" icon="check" disabled={saving} onClick={handleSave}>
-          {saving ? 'Menyimpan…' : isEdit ? 'Simpan perubahan' : 'Simpan & lanjutkan'}
+          {saving ? 'Saving…' : isEdit ? 'Save changes' : 'Save & continue'}
         </Btn>
       </div>
 
       {saved && (
         <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
           <Btn variant="secondary" icon="calendar" onClick={() => navigate('/doctor/schedule')}>
-            Atur jadwal praktik
+            Set practice schedule
           </Btn>
           <Btn variant="ghost" onClick={() => navigate('/doctor/dashboard')}>
-            Ke dashboard
+            Go to dashboard
           </Btn>
         </div>
       )}

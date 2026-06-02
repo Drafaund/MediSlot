@@ -33,27 +33,27 @@ const MedicalHistory = () => {
       setAiSummary(data.data);
     } catch {
       setAiSummary({
-        overview: 'Berdasarkan riwayat kesehatanmu, kondisi utama yang perlu dipantau adalah diabetes dan tekanan darah.',
-        chronicConditions: ['Diabetes Melitus — perlu kontrol rutin'],
-        ongoingMedications: ['Metformin 500mg (2x sehari)'],
-        patterns: ['Pola kunjungan konsisten 1x/bulan.'],
-        recommendations: ['Lanjutkan kontrol bulanan.', 'Lakukan tes lipid profile secara berkala.'],
+        overview: 'Based on your health history, the main conditions to monitor are diabetes and blood pressure.',
+        chronicConditions: ['Diabetes Mellitus — requires regular check-ups'],
+        ongoingMedications: ['Metformin 500mg (twice daily)'],
+        patterns: ['Consistent visit pattern once per month.'],
+        recommendations: ['Continue monthly check-ups.', 'Perform lipid profile tests periodically.'],
       });
     } finally {
       setAiLoading(false);
     }
   };
 
-  if (loading) return <div style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>Memuat riwayat…</div>;
+  if (loading) return <div style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>Loading history…</div>;
 
   if (records.length === 0) {
     return (
       <div className="msStack-md">
         <div>
-          <div className="msEyebrow">Riwayat kesehatan</div>
+          <div className="msEyebrow">Health history</div>
           <h1 className="msPageTitle">Timeline</h1>
         </div>
-        <Empty icon="file" title="Belum ada rekam medis" sub="Rekam medis akan muncul setelah konsultasi selesai"/>
+        <Empty icon="file" title="No medical records yet" sub="Medical records will appear after a completed consultation"/>
       </div>
     );
   }
@@ -63,7 +63,7 @@ const MedicalHistory = () => {
       {/* Left: timeline */}
       <div className="msStack-md" style={{ position: 'sticky', top: 24, alignSelf: 'flex-start' }}>
         <div>
-          <div className="msEyebrow">Riwayat kesehatan</div>
+          <div className="msEyebrow">Health history</div>
           <h1 className="msPageTitle">Timeline</h1>
         </div>
 
@@ -74,8 +74,8 @@ const MedicalHistory = () => {
               <Icon name="sparkles" size={14}/>
               <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.08em' }}>MediSlot AI</span>
             </div>
-            <div style={{ fontFamily: 'var(--serif)', fontSize: 18, fontWeight: 600, lineHeight: 1.2 }}>Ringkasan kesehatan AI</div>
-            <div style={{ fontSize: 12, opacity: 0.7, marginTop: 4 }}>Buat ringkasan dari {records.length} rekam medis</div>
+            <div style={{ fontFamily: 'var(--serif)', fontSize: 18, fontWeight: 600, lineHeight: 1.2 }}>AI Health Summary</div>
+            <div style={{ fontSize: 12, opacity: 0.7, marginTop: 4 }}>Generate summary from {records.length} medical records</div>
           </div>
         </button>
 
@@ -90,7 +90,7 @@ const MedicalHistory = () => {
                 <div className="msTimeline-dot"/>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 12, color: 'var(--muted)' }}>
-                    {new Date(r.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                    {new Date(r.date).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}
                   </div>
                   <div style={{ fontWeight: 600, fontSize: 14, marginTop: 2 }}>{r.diagnosis}</div>
                   <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>{getDoctorDisplayName(d)} · {r.clinicName}</div>
@@ -106,24 +106,24 @@ const MedicalHistory = () => {
         {aiOpen ? (
           <Card>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-              <Badge tone="accent" icon="sparkles">Ringkasan Kesehatan · AI Generated</Badge>
+              <Badge tone="accent" icon="sparkles">Health Summary · AI Generated</Badge>
               <button className="msIcon-btn" onClick={() => setAiOpen(false)}><Icon name="x" size={16}/></button>
             </div>
             {aiLoading ? (
               <div style={{ padding: 40, textAlign: 'center' }}>
                 <div className="msLoad-orb"/>
-                <div style={{ marginTop: 18, color: 'var(--muted)' }}>AI sedang menganalisis seluruh riwayat kesehatanmu…</div>
+                <div style={{ marginTop: 18, color: 'var(--muted)' }}>AI is analyzing your entire health history…</div>
               </div>
             ) : aiSummary ? (
               <div className="msStack-md">
                 <div>
-                  <h2 style={{ fontFamily: 'var(--serif)', fontSize: 26, fontWeight: 600, lineHeight: 1.2 }}>Ringkasan singkat</h2>
+                  <h2 style={{ fontFamily: 'var(--serif)', fontSize: 26, fontWeight: 600, lineHeight: 1.2 }}>Brief summary</h2>
                   <p style={{ marginTop: 10, lineHeight: 1.65, color: 'var(--ink-2)' }}>{aiSummary.overview}</p>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                   {aiSummary.chronicConditions?.length > 0 && (
                     <div style={{ padding: 16, background: 'var(--bg-2)', borderRadius: 12, border: '1px solid var(--border)' }}>
-                      <div className="msEyebrow">Kondisi yang dipantau</div>
+                      <div className="msEyebrow">Monitored conditions</div>
                       <ul style={{ margin: '8px 0 0', paddingLeft: 18, fontSize: 14, lineHeight: 1.6 }}>
                         {aiSummary.chronicConditions.map((c, i) => <li key={i}>{c}</li>)}
                       </ul>
@@ -131,7 +131,7 @@ const MedicalHistory = () => {
                   )}
                   {aiSummary.ongoingMedications?.length > 0 && (
                     <div style={{ padding: 16, background: 'var(--bg-2)', borderRadius: 12, border: '1px solid var(--border)' }}>
-                      <div className="msEyebrow">Obat rutin</div>
+                      <div className="msEyebrow">Regular medications</div>
                       <ul style={{ margin: '8px 0 0', paddingLeft: 18, fontSize: 14, lineHeight: 1.6 }}>
                         {aiSummary.ongoingMedications.map((m, i) => <li key={i}>{m}</li>)}
                       </ul>
@@ -140,7 +140,7 @@ const MedicalHistory = () => {
                 </div>
                 {aiSummary.patterns && (
                   <div>
-                    <div className="msEyebrow" style={{ marginBottom: 10 }}>Pola yang terdeteksi</div>
+                    <div className="msEyebrow" style={{ marginBottom: 10 }}>Detected patterns</div>
                     <ul style={{ margin: 0, paddingLeft: 18, lineHeight: 1.7, color: 'var(--ink-2)' }}>
                       {aiSummary.patterns.map((p, i) => <li key={i}>{p}</li>)}
                     </ul>
@@ -148,14 +148,14 @@ const MedicalHistory = () => {
                 )}
                 {aiSummary.recommendations && (
                   <div style={{ padding: 18, background: 'var(--accent-soft)', borderRadius: 12 }}>
-                    <div className="msEyebrow" style={{ color: 'var(--accent)', marginBottom: 10 }}>Rekomendasi tindak lanjut</div>
+                    <div className="msEyebrow" style={{ color: 'var(--accent)', marginBottom: 10 }}>Follow-up recommendations</div>
                     <ul style={{ margin: 0, paddingLeft: 18, lineHeight: 1.7, color: 'var(--ink-2)' }}>
                       {aiSummary.recommendations.map((p, i) => <li key={i}>{p}</li>)}
                     </ul>
                   </div>
                 )}
                 <div style={{ fontSize: 12, color: 'var(--muted)', lineHeight: 1.6, padding: '12px 0', borderTop: '1px solid var(--border)' }}>
-                  Ringkasan ini dihasilkan AI dari rekam medismu. Untuk keputusan medis, konsultasikan dengan dokter.
+                  This summary is AI-generated from your medical records. For medical decisions, consult with a doctor.
                 </div>
               </div>
             ) : null}
@@ -164,10 +164,10 @@ const MedicalHistory = () => {
           <Card>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
               <div>
-                <div className="msEyebrow">{new Date(openRecord.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
+                <div className="msEyebrow">{new Date(openRecord.date).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
                 <h2 style={{ fontFamily: 'var(--serif)', fontSize: 24, fontWeight: 600, marginTop: 4 }}>{openRecord.diagnosis}</h2>
               </div>
-              <Badge tone="sage">Selesai</Badge>
+              <Badge tone="sage">Completed</Badge>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 0', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
@@ -180,13 +180,13 @@ const MedicalHistory = () => {
 
             <div className="msStack-md" style={{ marginTop: 20 }}>
               <div>
-                <div className="msEyebrow" style={{ marginBottom: 8 }}>Keluhan utama</div>
+                <div className="msEyebrow" style={{ marginBottom: 8 }}>Chief complaint</div>
                 <p style={{ lineHeight: 1.65, color: 'var(--ink-2)', margin: 0 }}>{openRecord.chiefComplaint}</p>
               </div>
 
               {openRecord.symptoms?.length > 0 && (
                 <div>
-                  <div className="msEyebrow" style={{ marginBottom: 8 }}>Gejala</div>
+                  <div className="msEyebrow" style={{ marginBottom: 8 }}>Symptoms</div>
                   <div className="msChip-row">
                     {openRecord.symptoms.map((s, i) => <span key={i} className="msChip msChip-active">{s}</span>)}
                   </div>
@@ -195,7 +195,7 @@ const MedicalHistory = () => {
 
               {openRecord.vitalSigns && Object.keys(openRecord.vitalSigns).length > 0 && (
                 <div>
-                  <div className="msEyebrow" style={{ marginBottom: 8 }}>Tanda vital</div>
+                  <div className="msEyebrow" style={{ marginBottom: 8 }}>Vital signs</div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10 }}>
                     {Object.entries(openRecord.vitalSigns).map(([k, v]) => (
                       <div key={k} style={{ padding: 12, background: 'var(--bg-2)', borderRadius: 10, textAlign: 'center' }}>
@@ -209,14 +209,14 @@ const MedicalHistory = () => {
 
               {openRecord.treatment && (
                 <div>
-                  <div className="msEyebrow" style={{ marginBottom: 8 }}>Tindakan</div>
+                  <div className="msEyebrow" style={{ marginBottom: 8 }}>Treatment</div>
                   <p style={{ lineHeight: 1.65, color: 'var(--ink-2)', margin: 0 }}>{openRecord.treatment}</p>
                 </div>
               )}
 
               {openRecord.prescription?.length > 0 && (
                 <div>
-                  <div className="msEyebrow" style={{ marginBottom: 10 }}>Resep obat</div>
+                  <div className="msEyebrow" style={{ marginBottom: 10 }}>Prescription</div>
                   <div className="msStack-sm">
                     {openRecord.prescription.map((p, i) => (
                       <div key={i} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 10, padding: 12, background: 'var(--bg-2)', borderRadius: 10, fontSize: 13 }}>
@@ -232,7 +232,7 @@ const MedicalHistory = () => {
 
               {openRecord.notes && (
                 <div>
-                  <div className="msEyebrow" style={{ marginBottom: 8 }}>Catatan dokter</div>
+                  <div className="msEyebrow" style={{ marginBottom: 8 }}>Doctor's notes</div>
                   <p style={{ lineHeight: 1.65, color: 'var(--ink-2)', margin: 0 }}>{openRecord.notes}</p>
                 </div>
               )}
@@ -242,9 +242,9 @@ const MedicalHistory = () => {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <Icon name="calendar" size={16} style={{ color: 'var(--accent)' }}/>
                     <div>
-                      <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--accent)' }}>Kontrol berikutnya</div>
+                      <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--accent)' }}>Next follow-up</div>
                       <div style={{ fontSize: 13, color: 'var(--ink-2)', marginTop: 2 }}>
-                        {new Date(openRecord.followUpDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                        {new Date(openRecord.followUpDate).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}
                       </div>
                     </div>
                   </div>

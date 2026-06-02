@@ -8,10 +8,10 @@ const AVATAR_COLORS = { patient: 'mauve', doctor: 'sage', admin: 'ocean' };
 
 const timeAgo = (dateStr) => {
   const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
-  if (diff < 60) return 'Baru saja';
-  if (diff < 3600) return `${Math.floor(diff / 60)} mnt lalu`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)} jam lalu`;
-  return `${Math.floor(diff / 86400)} hari lalu`;
+  if (diff < 60) return 'Just now';
+  if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)} hr ago`;
+  return `${Math.floor(diff / 86400)} days ago`;
 };
 
 const TYPE_ICON = {
@@ -32,11 +32,11 @@ const NotifPanel = ({ notifs, unread, onMarkAll, onMarkOne, onClose }) => (
     overflow: 'hidden',
   }}>
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderBottom: '1px solid var(--border)' }}>
-      <div style={{ fontWeight: 600, fontSize: 14 }}>Notifikasi {unread > 0 && <span style={{ color: 'var(--accent)' }}>({unread} baru)</span>}</div>
+      <div style={{ fontWeight: 600, fontSize: 14 }}>Notifications {unread > 0 && <span style={{ color: 'var(--accent)' }}>({unread} new)</span>}</div>
       <div style={{ display: 'flex', gap: 6 }}>
         {unread > 0 && (
           <button onClick={onMarkAll} style={{ fontSize: 12, color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px' }}>
-            Tandai semua dibaca
+            Mark all as read
           </button>
         )}
         <button onClick={onClose} className="msIcon-btn" style={{ width: 24, height: 24 }}><Icon name="x" size={13}/></button>
@@ -46,7 +46,7 @@ const NotifPanel = ({ notifs, unread, onMarkAll, onMarkOne, onClose }) => (
     <div style={{ maxHeight: 380, overflowY: 'auto' }}>
       {notifs.length === 0 ? (
         <div style={{ padding: '32px 16px', textAlign: 'center', color: 'var(--muted)', fontSize: 13 }}>
-          Belum ada notifikasi
+          No notifications yet
         </div>
       ) : notifs.map(n => (
         <button key={n._id} onClick={() => onMarkOne(n._id)}
@@ -96,14 +96,14 @@ const TopBar = ({ onToggle }) => {
     } catch { /* fail silently */ }
   }, [user]);
 
-  // Fetch saat mount + polling setiap 30 detik
+  // Fetch on mount + poll every 30 seconds
   useEffect(() => {
     fetchNotifs();
     const interval = setInterval(fetchNotifs, 30000);
     return () => clearInterval(interval);
   }, [fetchNotifs]);
 
-  // Tutup panel saat klik di luar
+  // Close panel when clicking outside
   useEffect(() => {
     const handler = (e) => {
       if (panelRef.current && !panelRef.current.contains(e.target)) setOpen(false);
@@ -133,12 +133,12 @@ const TopBar = ({ onToggle }) => {
 
   const initials = user.name?.split(' ').map(x => x[0]).slice(0, 2).join('') || '??';
   const color = AVATAR_COLORS[user.role] || 'sage';
-  const subLabel = user.role === 'patient' ? 'Pasien' : user.role === 'doctor' ? 'Dokter' : 'Admin';
+  const subLabel = user.role === 'patient' ? 'Patient' : user.role === 'doctor' ? 'Doctor' : 'Admin';
 
   return (
     <div className="msTopbar">
-      {/* Hamburger — hanya tampil di mobile via CSS */}
-      <button className="msHamburger msIcon-btn msIcon-btn-lg" onClick={onToggle} aria-label="Buka menu">
+      {/* Hamburger — only visible on mobile via CSS */}
+      <button className="msHamburger msIcon-btn msIcon-btn-lg" onClick={onToggle} aria-label="Open menu">
         <Icon name="menu" size={18}/>
       </button>
 
@@ -146,7 +146,7 @@ const TopBar = ({ onToggle }) => {
         {user.role === 'patient' && (
           <button className="msTopbar-search" onClick={() => navigate('/doctors')}>
             <Icon name="search" size={16} style={{ color: 'var(--muted)' }}/>
-            <span style={{ color: 'var(--muted)', fontSize: 14 }}>Cari dokter, spesialisasi, atau klinik…</span>
+            <span style={{ color: 'var(--muted)', fontSize: 14 }}>Search for doctors, specializations, or clinics…</span>
             <span className="msHero-kbd" style={{ marginLeft: 'auto' }}>⌘K</span>
           </button>
         )}
@@ -231,7 +231,7 @@ const TopBar = ({ onToggle }) => {
                     onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-2)'}
                     onMouseLeave={e => e.currentTarget.style.background = 'none'}>
                     <Icon name="user" size={15}/>
-                    Profil Saya
+                    My Profile
                   </button>
                 )}
                 {user.role === 'doctor' && (
@@ -240,7 +240,7 @@ const TopBar = ({ onToggle }) => {
                     onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-2)'}
                     onMouseLeave={e => e.currentTarget.style.background = 'none'}>
                     <Icon name="user" size={15}/>
-                    Profil Dokter
+                    Doctor Profile
                   </button>
                 )}
                 <button onClick={() => { setProfileOpen(false); navigate(user.role === 'patient' ? '/dashboard' : `/${user.role}/dashboard`); }}
@@ -259,7 +259,7 @@ const TopBar = ({ onToggle }) => {
                   onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-2)'}
                   onMouseLeave={e => e.currentTarget.style.background = 'none'}>
                   <Icon name="logout" size={15}/>
-                  Keluar
+                  Logout
                 </button>
               </div>
             </div>

@@ -5,21 +5,21 @@ import { Icon, Card, Btn, Input, Select, Empty, DoctorCard } from '../components
 import { formatDoctorName } from '../utils/doctorName';
 
 const SPECIALIZATIONS = [
-  { value: 'Dokter Umum',           label: 'Dokter Umum' },
-  { value: 'Penyakit Dalam',        label: 'Penyakit Dalam (Sp.PD)' },
-  { value: 'Anak',                  label: 'Anak (Sp.A)' },
-  { value: 'Kandungan',             label: 'Kandungan (Sp.OG)' },
-  { value: 'Bedah Umum',            label: 'Bedah Umum (Sp.B)' },
-  { value: 'Jantung & Pembuluh Darah', label: 'Jantung (Sp.JP)' },
-  { value: 'Saraf',                 label: 'Saraf (Sp.S)' },
-  { value: 'Mata',                  label: 'Mata (Sp.M)' },
-  { value: 'THT',                   label: 'THT (Sp.THT)' },
-  { value: 'Kulit & Kelamin',       label: 'Kulit & Kelamin (Sp.KK)' },
-  { value: 'Ortopedi',              label: 'Ortopedi (Sp.OT)' },
-  { value: 'Urologi',               label: 'Urologi (Sp.U)' },
-  { value: 'Psikiatri',             label: 'Psikiatri (Sp.KJ)' },
-  { value: 'Paru',                  label: 'Paru (Sp.P)' },
-  { value: 'Gigi & Mulut',          label: 'Gigi & Mulut (drg.)' },
+  { value: 'Dokter Umum',           label: 'General Practitioner' },
+  { value: 'Penyakit Dalam',        label: 'Internal Medicine (Sp.PD)' },
+  { value: 'Anak',                  label: 'Pediatrics (Sp.A)' },
+  { value: 'Kandungan',             label: 'Obstetrics & Gynecology (Sp.OG)' },
+  { value: 'Bedah Umum',            label: 'General Surgery (Sp.B)' },
+  { value: 'Jantung & Pembuluh Darah', label: 'Cardiology (Sp.JP)' },
+  { value: 'Saraf',                 label: 'Neurology (Sp.S)' },
+  { value: 'Mata',                  label: 'Ophthalmology (Sp.M)' },
+  { value: 'THT',                   label: 'ENT (Sp.THT)' },
+  { value: 'Kulit & Kelamin',       label: 'Dermatology & Venereology (Sp.KK)' },
+  { value: 'Ortopedi',              label: 'Orthopedics (Sp.OT)' },
+  { value: 'Urologi',               label: 'Urology (Sp.U)' },
+  { value: 'Psikiatri',             label: 'Psychiatry (Sp.KJ)' },
+  { value: 'Paru',                  label: 'Pulmonology (Sp.P)' },
+  { value: 'Gigi & Mulut',          label: 'Dentistry (drg.)' },
 ];
 
 const CITIES = ['Jakarta', 'Bandung', 'Surabaya', 'Yogyakarta', 'Semarang', 'Medan', 'Tangerang'];
@@ -43,7 +43,7 @@ const SearchDoctor = () => {
 
   const detectLocation = () => {
     if (!navigator.geolocation) {
-      setLocError('Browser tidak mendukung geolokasi.');
+      setLocError('Your browser does not support geolocation.');
       return;
     }
     setLocating(true);
@@ -52,32 +52,32 @@ const SearchDoctor = () => {
       async ({ coords }) => {
         try {
           const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords.latitude}&lon=${coords.longitude}&accept-language=id`,
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords.latitude}&lon=${coords.longitude}&accept-language=en`,
             { headers: { 'User-Agent': 'MediSlot/1.0' } }
           );
           const data = await res.json();
           const addr = data.address || {};
-          // Ambil nama kota dari field yang tersedia, prioritas kota > kota madya > kabupaten
+          // Get city name from available fields, priority: city > town > municipality > county
           const raw = addr.city || addr.town || addr.municipality || addr.county || addr.state_district || '';
-          // Hilangkan prefix "Kota " atau "Kabupaten "
+          // Remove "Kota " or "Kabupaten " prefix
           const detected = raw.replace(/^(kota|kabupaten)\s+/i, '').trim();
           if (detected) {
             setCity(detected);
             const params = buildParams({ city: detected });
             applyAndFetch(params);
           } else {
-            setLocError('Kota tidak terdeteksi. Coba pilih manual.');
+            setLocError('City not detected. Please select manually.');
           }
         } catch {
-          setLocError('Gagal mendapatkan nama kota. Coba pilih manual.');
+          setLocError('Failed to get city name. Please select manually.');
         } finally {
           setLocating(false);
         }
       },
       (err) => {
         setLocating(false);
-        if (err.code === 1) setLocError('Izin lokasi ditolak. Aktifkan di pengaturan browser.');
-        else setLocError('Gagal mendeteksi lokasi. Coba pilih manual.');
+        if (err.code === 1) setLocError('Location permission denied. Enable it in browser settings.');
+        else setLocError('Failed to detect location. Please select manually.');
       },
       { timeout: 8000 }
     );
@@ -101,7 +101,7 @@ const SearchDoctor = () => {
       const { data } = await api.get('/doctors', { params });
       setDoctors(data.data || []);
     } catch {
-      setError('Gagal memuat dokter. Coba lagi.');
+      setError('Failed to load doctors. Please try again.');
       setDoctors([]);
     } finally {
       setLoading(false);
@@ -145,25 +145,25 @@ const SearchDoctor = () => {
   return (
     <div className="msStack-md">
       <div>
-        <div className="msEyebrow">Pencarian</div>
-        <h1 className="msPageTitle">Cari dokter</h1>
+        <div className="msEyebrow">Search</div>
+        <h1 className="msPageTitle">Find a doctor</h1>
       </div>
 
       <Card>
         <div className="msSearch-filter">
-          <Input icon="search" placeholder="Nama dokter, spesialisasi, atau klinik…" value={q} onChange={handleSearchChange}/>
+          <Input icon="search" placeholder="Doctor name, specialization, or clinic…" value={q} onChange={handleSearchChange}/>
           <Select value={specialization} onChange={v => { setSpecialization(v); applyAndFetch(buildParams({ specialization: v })); }}
-            placeholder="Semua spesialisasi" options={SPECIALIZATIONS}/>
+            placeholder="All specializations" options={SPECIALIZATIONS}/>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             <div style={{ display: 'flex', gap: 6 }}>
               <div style={{ flex: 1 }}>
                 <Select value={city} onChange={v => { setCity(v); applyAndFetch(buildParams({ city: v })); }}
-                  placeholder="Semua kota" options={CITIES}/>
+                  placeholder="All cities" options={CITIES}/>
               </div>
               <button
                 onClick={detectLocation}
                 disabled={locating}
-                title="Deteksi lokasi saya"
+                title="Detect my location"
                 style={{
                   flexShrink: 0, height: 40, padding: '0 10px', borderRadius: 8,
                   border: '1px solid var(--border)', background: locating ? 'var(--bg-2)' : 'var(--paper)',
@@ -173,7 +173,7 @@ const SearchDoctor = () => {
                 }}
               >
                 <Icon name="pin" size={14}/>
-                {locating ? 'Mendeteksi…' : 'Lokasiku'}
+                {locating ? 'Detecting…' : 'My location'}
               </button>
             </div>
             {locError && (
@@ -181,7 +181,7 @@ const SearchDoctor = () => {
             )}
             {!locError && city && !CITIES.includes(city) && (
               <div style={{ fontSize: 11, color: 'var(--accent)', lineHeight: 1.4 }}>
-                📍 Terdeteksi: {city}
+                📍 Detected: {city}
               </div>
             )}
           </div>
@@ -192,17 +192,17 @@ const SearchDoctor = () => {
             <label className="msToggle">
               <input type="checkbox" checked={bpjsOnly} onChange={e => { setBpjsOnly(e.target.checked); applyAndFetch(buildParams({ acceptBPJS: e.target.checked })); }}/>
               <span className="msToggle-track"/>
-              <span>Hanya yang menerima BPJS</span>
+              <span>BPJS accepted only</span>
             </label>
             <div style={{ width: 1, height: 16, background: 'var(--border)', margin: '0 6px' }}/>
             <div className="msTabs-mini">
-              {[['fee', 'Harga terendah'], ['experience', 'Pengalaman terlama']].map(([v, l]) => (
+              {[['fee', 'Lowest price'], ['experience', 'Most experienced']].map(([v, l]) => (
                 <button key={v} className={`msTab-mini ${sort === v ? 'msTab-mini-active' : ''}`} onClick={() => setSort(v)}>{l}</button>
               ))}
             </div>
           </div>
           <div style={{ color: 'var(--muted)', fontSize: 14 }}>
-            {loading ? 'Mencari…' : <><strong style={{ color: 'var(--ink)' }}>{sortedDoctors.length}</strong> dokter ditemukan</>}
+            {loading ? 'Searching…' : <><strong style={{ color: 'var(--ink)' }}>{sortedDoctors.length}</strong> doctors found</>}
           </div>
         </div>
       </Card>
@@ -214,7 +214,7 @@ const SearchDoctor = () => {
       )}
 
       {!loading && !error && sortedDoctors.length === 0 && (
-        <Empty icon="search" title="Tidak ada dokter yang cocok" sub="Coba ubah filter atau kata kunci pencarian"/>
+        <Empty icon="search" title="No matching doctors found" sub="Try changing your filters or search keyword"/>
       )}
 
       {!loading && sortedDoctors.length > 0 && (

@@ -3,8 +3,8 @@ import api from '../services/api';
 import { Card, Badge, Avatar, Btn, Empty, Toast } from '../components/ui';
 
 const ROLE_BADGE = {
-  patient: <Badge tone="neutral" icon="user">Pasien</Badge>,
-  doctor:  <Badge tone="sage"    icon="stetho">Dokter</Badge>,
+  patient: <Badge tone="neutral" icon="user">Patient</Badge>,
+  doctor:  <Badge tone="sage"    icon="stetho">Doctor</Badge>,
   admin:   <Badge tone="ocean"   icon="shield">Admin</Badge>,
 };
 
@@ -15,7 +15,7 @@ const AdminUsers = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [toast, setToast] = useState(null);
-  const [confirmId, setConfirmId] = useState(null); // ID yang sedang dikonfirmasi hapus
+  const [confirmId, setConfirmId] = useState(null); // ID being confirmed for deletion
 
   useEffect(() => {
     api.get('/auth/admin/users')
@@ -33,7 +33,7 @@ const AdminUsers = () => {
     admin:   users.filter(u => u.role === 'admin').length,
   };
 
-  const formatDate = (d) => new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+  const formatDate = (d) => new Date(d).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
 
   const handleDelete = async (id) => {
     try {
@@ -41,7 +41,7 @@ const AdminUsers = () => {
       setUsers(prev => prev.filter(u => u._id !== id));
       setToast(data.message);
     } catch (err) {
-      setToast(err.response?.data?.message || 'Gagal menghapus akun');
+      setToast(err.response?.data?.message || 'Failed to delete account');
     } finally {
       setConfirmId(null);
     }
@@ -50,20 +50,20 @@ const AdminUsers = () => {
   return (
     <div className="msStack-md">
       <div>
-        <div className="msEyebrow">Admin · Manajemen Pengguna</div>
-        <h1 className="msPageTitle">Semua pengguna</h1>
+        <div className="msEyebrow">Admin · User Management</div>
+        <h1 className="msPageTitle">All users</h1>
         <p style={{ color: 'var(--muted)', marginTop: 6 }}>
-          {users.length} pengguna terdaftar di platform
+          {users.length} users registered on the platform
         </p>
       </div>
 
       {/* Filter tabs */}
       <div className="msTabs">
         {[
-          ['all',     `Semua (${counts.all})`],
-          ['patient', `Pasien (${counts.patient})`],
-          ['doctor',  `Dokter (${counts.doctor})`],
-          ['admin',   `Admin (${counts.admin})`],
+          ['all',     `All (${counts.all})`],
+          ['patient', `Patients (${counts.patient})`],
+          ['doctor',  `Doctors (${counts.doctor})`],
+          ['admin',   `Admins (${counts.admin})`],
         ].map(([v, l]) => (
           <button key={v} className={`msTab ${filter === v ? 'msTab-active' : ''}`} onClick={() => setFilter(v)}>{l}</button>
         ))}
@@ -72,12 +72,12 @@ const AdminUsers = () => {
       {loading ? (
         <div style={{ height: 300, borderRadius: 14, background: 'var(--bg-2)' }}/>
       ) : filtered.length === 0 ? (
-        <Empty icon="users" title="Tidak ada pengguna" sub="Tidak ada pengguna dengan role ini"/>
+        <Empty icon="users" title="No users found" sub="No users with this role"/>
       ) : (
         <Card padded={false}>
           {/* Header */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr 100px 110px auto', gap: 16, padding: '10px 20px', borderBottom: '1px solid var(--border)' }}>
-            {['Nama', 'Email', 'Role', 'Bergabung', ''].map((h, i) => (
+            {['Name', 'Email', 'Role', 'Joined', ''].map((h, i) => (
               <span key={i} style={{ fontSize: 11, fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.06em' }}>{h}</span>
             ))}
           </div>
@@ -104,21 +104,21 @@ const AdminUsers = () => {
                 <span>{ROLE_BADGE[u.role] || <Badge tone="neutral">{u.role}</Badge>}</span>
                 <span style={{ fontSize: 12, color: 'var(--muted)' }}>{formatDate(u.createdAt)}</span>
 
-                {/* Kolom aksi — hanya pasien yang bisa dihapus */}
+                {/* Action column — only patients can be deleted */}
                 <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                   {u.role === 'patient' && !isConfirming && (
                     <Btn variant="ghost" size="sm" icon="x" onClick={() => setConfirmId(u._id)}>
-                      Hapus
+                      Delete
                     </Btn>
                   )}
                   {isConfirming && (
                     <>
-                      <span style={{ fontSize: 12, color: '#DC2626', fontWeight: 500 }}>Yakin?</span>
+                      <span style={{ fontSize: 12, color: '#DC2626', fontWeight: 500 }}>Are you sure?</span>
                       <Btn variant="ghost" size="sm" onClick={() => handleDelete(u._id)}
                         style={{ color: '#DC2626', borderColor: '#FCA5A5' }}>
-                        Ya, hapus
+                        Yes, delete
                       </Btn>
-                      <Btn variant="ghost" size="sm" onClick={() => setConfirmId(null)}>Batal</Btn>
+                      <Btn variant="ghost" size="sm" onClick={() => setConfirmId(null)}>Cancel</Btn>
                     </>
                   )}
                 </div>

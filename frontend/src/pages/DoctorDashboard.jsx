@@ -5,11 +5,11 @@ import api from '../services/api';
 import { Icon, Card, Badge, Avatar, Btn, Stat, SectionHeader, Empty } from '../components/ui';
 
 const STATUS_BADGE = {
-  completed: <Badge tone="sage" icon="check-circ">Selesai</Badge>,
-  in_progress: <Badge tone="accent" icon="stetho">Sedang berlangsung</Badge>,
-  waiting: <Badge tone="neutral" icon="clock">Menunggu</Badge>,
-  confirmed: <Badge tone="sage" icon="check-circ">Dikonfirmasi</Badge>,
-  pending: <Badge tone="amber" icon="clock">Menunggu</Badge>,
+  completed: <Badge tone="sage" icon="check-circ">Completed</Badge>,
+  in_progress: <Badge tone="accent" icon="stetho">In progress</Badge>,
+  waiting: <Badge tone="neutral" icon="clock">Waiting</Badge>,
+  confirmed: <Badge tone="sage" icon="check-circ">Confirmed</Badge>,
+  pending: <Badge tone="amber" icon="clock">Pending</Badge>,
 };
 
 const DoctorDashboard = () => {
@@ -18,10 +18,10 @@ const DoctorDashboard = () => {
   const [appointments, setAppointments] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState(null);   // DoctorProfile untuk cek status verifikasi
+  const [profile, setProfile] = useState(null);   // DoctorProfile to check verification status
   const [profileLoading, setProfileLoading] = useState(true);
 
-  const today = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const today = new Date().toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
   useEffect(() => {
     api.get('/doctors/my-profile')
@@ -73,23 +73,23 @@ const DoctorDashboard = () => {
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
         <div>
           <div className="msEyebrow">{today}</div>
-          <h1 className="msPageTitle">Praktik hari ini</h1>
-          <p style={{ color: 'var(--muted)', marginTop: 6 }}>Selamat datang kembali, {user?.name?.split(' ')[0]}</p>
+          <h1 className="msPageTitle">Today's practice</h1>
+          <p style={{ color: 'var(--muted)', marginTop: 6 }}>Welcome back, {user?.name?.split(' ')[0]}</p>
         </div>
-        <Btn variant="secondary" icon="calendar" onClick={() => navigate('/doctor/schedule')}>Atur jadwal</Btn>
+        <Btn variant="secondary" icon="calendar" onClick={() => navigate('/doctor/schedule')}>Manage schedule</Btn>
       </div>
 
-      {/* Banner status onboarding / verifikasi */}
+      {/* Onboarding / verification status banner */}
       {!profileLoading && !profile && (
         <div style={{ display: 'flex', gap: 14, padding: '16px 20px', background: 'var(--accent-soft)', borderRadius: 12, border: '1px solid var(--accent)' }}>
           <Icon name="info" size={20} style={{ color: 'var(--accent)', flexShrink: 0, marginTop: 2 }}/>
           <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 600, color: 'var(--accent)', marginBottom: 4 }}>Selamat datang! Profil belum dibuat</div>
+            <div style={{ fontWeight: 600, color: 'var(--accent)', marginBottom: 4 }}>Welcome! Profile not yet created</div>
             <div style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.6 }}>
-              Lengkapi profil praktik dan jadwal Anda agar pasien bisa menemukan dan booking dengan Anda.
+              Complete your practice profile and schedule so patients can find and book with you.
             </div>
           </div>
-          <Btn variant="primary" size="sm" onClick={() => navigate('/doctor/profile?onboarding=true')}>Buat profil</Btn>
+          <Btn variant="primary" size="sm" onClick={() => navigate('/doctor/profile?onboarding=true')}>Create profile</Btn>
         </div>
       )}
 
@@ -97,10 +97,10 @@ const DoctorDashboard = () => {
         <div style={{ display: 'flex', gap: 14, padding: '16px 20px', background: '#FEF3C7', borderRadius: 12, border: '1px solid #FCD34D' }}>
           <Icon name="clock" size={20} style={{ color: '#92400E', flexShrink: 0, marginTop: 2 }}/>
           <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 600, color: '#92400E', marginBottom: 4 }}>Menunggu verifikasi admin</div>
+            <div style={{ fontWeight: 600, color: '#92400E', marginBottom: 4 }}>Awaiting admin verification</div>
             <div style={{ fontSize: 13, color: '#78350F', lineHeight: 1.6 }}>
-              Profil Anda sedang ditinjau. Setelah diverifikasi, Anda akan muncul di pencarian pasien
-              dan dapat menerima appointment. Anda akan mendapat notifikasi setelah proses selesai.
+              Your profile is under review. Once verified, you will appear in patient searches
+              and can receive appointments. You will be notified when the process is complete.
             </div>
           </div>
         </div>
@@ -110,12 +110,12 @@ const DoctorDashboard = () => {
         <div style={{ display: 'flex', gap: 14, padding: '16px 20px', background: '#FEF2F2', borderRadius: 12, border: '1px solid #FCA5A5' }}>
           <Icon name="x" size={20} style={{ color: '#DC2626', flexShrink: 0, marginTop: 2 }}/>
           <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 600, color: '#DC2626', marginBottom: 4 }}>Verifikasi ditolak</div>
+            <div style={{ fontWeight: 600, color: '#DC2626', marginBottom: 4 }}>Verification rejected</div>
             <div style={{ fontSize: 13, color: '#7F1D1D', lineHeight: 1.6 }}>
-              Profil Anda belum dapat diverifikasi. Perbarui informasi profil Anda dan hubungi admin MediSlot untuk informasi lebih lanjut.
+              Your profile could not be verified. Please update your profile information and contact MediSlot admin for further information.
             </div>
           </div>
-          <Btn variant="ghost" size="sm" onClick={() => navigate('/doctor/profile')}>Perbarui profil</Btn>
+          <Btn variant="ghost" size="sm" onClick={() => navigate('/doctor/profile')}>Update profile</Btn>
         </div>
       )}
 
@@ -123,31 +123,31 @@ const DoctorDashboard = () => {
         <div style={{ display: 'flex', gap: 12, padding: '12px 16px', background: '#F0FDF4', borderRadius: 10, border: '1px solid #86EFAC', alignItems: 'center' }}>
           <Icon name="check-circ" size={16} style={{ color: '#16A34A', flexShrink: 0 }}/>
           <span style={{ fontSize: 13, color: '#14532D' }}>
-            Profil Anda aktif dan terverifikasi — pasien dapat menemukan dan booking dengan Anda.
+            Your profile is active and verified — patients can find and book with you.
           </span>
         </div>
       )}
 
       <div className="msGrid-4">
-        <Stat label="Total appointment" value={stats.total} sub="Hari ini" icon="users" tone="accent"/>
-        <Stat label="Selesai" value={stats.completed} sub={`${stats.total > 0 ? Math.round(stats.completed/stats.total*100) : 0}% dari total`} icon="check-circ"/>
-        <Stat label="Dikonfirmasi" value={stats.confirmed} sub="Siap konsultasi" icon="stetho" tone="accent"/>
-        <Stat label="Menunggu" value={stats.pending} sub="Perlu konfirmasi" icon="clock"/>
+        <Stat label="Total appointments" value={stats.total} sub="Today" icon="users" tone="accent"/>
+        <Stat label="Completed" value={stats.completed} sub={`${stats.total > 0 ? Math.round(stats.completed/stats.total*100) : 0}% of total`} icon="check-circ"/>
+        <Stat label="Confirmed" value={stats.confirmed} sub="Ready for consultation" icon="stetho" tone="accent"/>
+        <Stat label="Pending" value={stats.pending} sub="Needs confirmation" icon="clock"/>
       </div>
 
       {loading ? (
         <div style={{ height: 300, borderRadius: 14, background: 'var(--bg-2)' }}/>
       ) : appointments.length === 0 ? (
-        <Empty icon="calendar" title="Belum ada appointment hari ini" sub="Pasien akan muncul di sini setelah booking"/>
+        <Empty icon="calendar" title="No appointments today" sub="Patients will appear here after booking"/>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: 16 }}>
           {/* Queue list */}
           <Card padded={false}>
             <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <div style={{ fontFamily: 'var(--serif)', fontSize: 18 }}>Antrian pasien</div>
+                <div style={{ fontFamily: 'var(--serif)', fontSize: 18 }}>Patient queue</div>
                 <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 2 }}>
-                  Total: <strong style={{ color: 'var(--ink)', fontFamily: 'var(--mono)' }}>{appointments.length}</strong> pasien
+                  Total: <strong style={{ color: 'var(--ink)', fontFamily: 'var(--mono)' }}>{appointments.length}</strong> patients
                 </div>
               </div>
             </div>
@@ -164,7 +164,7 @@ const DoctorDashboard = () => {
                     </div>
                     <div style={{ flex: 1, textAlign: 'left' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <strong style={{ fontSize: 14 }}>{p?.name || 'Pasien'}</strong>
+                        <strong style={{ fontSize: 14 }}>{p?.name || 'Patient'}</strong>
                       </div>
                       {a.notes && <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 2 }}>{a.notes}</div>}
                     </div>
@@ -184,13 +184,13 @@ const DoctorDashboard = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14, paddingBottom: 16, borderBottom: '1px solid var(--border)' }}>
                   <Avatar initials={patientInitials(selected.patientId?.name)} color="mauve" size={56}/>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 600, fontSize: 16 }}>{selected.patientId?.name || 'Pasien'}</div>
+                    <div style={{ fontWeight: 600, fontSize: 16 }}>{selected.patientId?.name || 'Patient'}</div>
                     <div style={{ color: 'var(--muted)', fontSize: 13 }}>
-                      {[selected.patientId?.gender, calcAge(selected.patientId?.dateOfBirth) != null ? `${calcAge(selected.patientId?.dateOfBirth)} tahun` : null].filter(Boolean).join(' · ') || selected.patientId?.email}
+                      {[selected.patientId?.gender, calcAge(selected.patientId?.dateOfBirth) != null ? `${calcAge(selected.patientId?.dateOfBirth)} years old` : null].filter(Boolean).join(' · ') || selected.patientId?.email}
                     </div>
                     {selected.patientId?.bloodType && (
                       <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
-                        Gol. darah: <strong>{selected.patientId.bloodType}</strong>
+                        Blood type: <strong>{selected.patientId.bloodType}</strong>
                       </div>
                     )}
                     {selected.patientId?.allergies?.length > 0 && (
@@ -204,7 +204,7 @@ const DoctorDashboard = () => {
                     )}
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <div className="msEyebrow">Antrian</div>
+                    <div className="msEyebrow">Queue</div>
                     <div style={{ fontFamily: 'var(--mono)', fontSize: 28, fontWeight: 700, lineHeight: 1, marginTop: 2 }}>
                       #{String(selected.queueNumber || 1).padStart(2, '0')}
                     </div>
@@ -213,7 +213,7 @@ const DoctorDashboard = () => {
 
                 {selected.notes && (
                   <div style={{ marginTop: 16 }}>
-                    <div className="msEyebrow">Keluhan dari pasien</div>
+                    <div className="msEyebrow">Patient complaint</div>
                     <p style={{ marginTop: 6, fontSize: 14, lineHeight: 1.6, color: 'var(--ink-2)' }}>{selected.notes}</p>
                   </div>
                 )}
@@ -222,24 +222,24 @@ const DoctorDashboard = () => {
                   {(selected.status === 'pending' || selected.status === 'confirmed') && (
                     <>
                       <Btn variant="primary" icon="doc-add" full onClick={() => navigate(`/doctor/record/${selected._id}`)}>
-                        Input rekam medis
+                        Input medical record
                       </Btn>
                       <div style={{ display: 'flex', gap: 8 }}>
                         <Btn variant="secondary" full icon="check" onClick={() => updateStatus(selected._id, 'completed')}>
-                          Selesaikan konsultasi
+                          Complete consultation
                         </Btn>
-                        <Btn variant="ghost" icon="x" onClick={() => updateStatus(selected._id, 'cancelled')}>Tolak</Btn>
+                        <Btn variant="ghost" icon="x" onClick={() => updateStatus(selected._id, 'cancelled')}>Reject</Btn>
                       </div>
                     </>
                   )}
                   {selected.status === 'completed' && (
                     <Btn variant="secondary" icon="file" full onClick={() => navigate(`/doctor/record/${selected._id}`)}>
-                      Lihat rekam medis
+                      View medical record
                     </Btn>
                   )}
                 </div>
               </Card>
-            ) : <Empty title="Pilih pasien dari antrian"/>}
+            ) : <Empty title="Select a patient from the queue"/>}
           </div>
         </div>
       )}

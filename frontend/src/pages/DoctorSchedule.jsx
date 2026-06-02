@@ -4,9 +4,9 @@ import api from '../services/api';
 import { Icon, Card, Btn, Toast } from '../components/ui';
 
 const DAYS = [
-  { label: 'Senin', idx: 1 }, { label: 'Selasa', idx: 2 }, { label: 'Rabu', idx: 3 },
-  { label: 'Kamis', idx: 4 }, { label: 'Jumat', idx: 5 }, { label: 'Sabtu', idx: 6 },
-  { label: 'Minggu', idx: 0 },
+  { label: 'Monday', idx: 1 }, { label: 'Tuesday', idx: 2 }, { label: 'Wednesday', idx: 3 },
+  { label: 'Thursday', idx: 4 }, { label: 'Friday', idx: 5 }, { label: 'Saturday', idx: 6 },
+  { label: 'Sunday', idx: 0 },
 ];
 
 const DEFAULT_SCHEDULE = DAYS.map(d => ({
@@ -65,9 +65,9 @@ const DoctorSchedule = () => {
           await api.post('/schedules', payload);
         }
       }
-      setToast('Jadwal berhasil disimpan');
+      setToast('Schedule saved successfully');
     } catch {
-      setToast('Gagal menyimpan jadwal');
+      setToast('Failed to save schedule');
     } finally {
       setSaving(false);
     }
@@ -79,14 +79,14 @@ const DoctorSchedule = () => {
     <div className="msStack-md" style={{ maxWidth: 980 }}>
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
         <div>
-          <div className="msEyebrow">Jadwal Praktik</div>
-          <h1 className="msPageTitle">Atur slot mingguan</h1>
-          <p style={{ color: 'var(--muted)', marginTop: 6 }}>Perubahan langsung tersinkron ke booking pasien</p>
+          <div className="msEyebrow">Practice Schedule</div>
+          <h1 className="msPageTitle">Manage weekly slots</h1>
+          <p style={{ color: 'var(--muted)', marginTop: 6 }}>Changes sync immediately to patient bookings</p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <Btn variant="ghost" icon="x" onClick={() => navigate('/doctor/dashboard')}>Batal</Btn>
+          <Btn variant="ghost" icon="x" onClick={() => navigate('/doctor/dashboard')}>Cancel</Btn>
           <Btn variant="primary" icon="check" disabled={saving} onClick={handleSave}>
-            {saving ? 'Menyimpan…' : 'Simpan perubahan'}
+            {saving ? 'Saving…' : 'Save changes'}
           </Btn>
         </div>
       </div>
@@ -97,8 +97,8 @@ const DoctorSchedule = () => {
         <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 16 }}>
           <Card padded={false}>
             <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)' }}>
-              <div style={{ fontFamily: 'var(--serif)', fontSize: 18 }}>Jadwal mingguan</div>
-              <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 2 }}>Klik toggle untuk mengaktifkan/nonaktifkan hari</div>
+              <div style={{ fontFamily: 'var(--serif)', fontSize: 18 }}>Weekly schedule</div>
+              <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 2 }}>Click toggle to enable/disable days</div>
             </div>
             <div>
               {schedule.map((s, i) => (
@@ -111,7 +111,7 @@ const DoctorSchedule = () => {
                     <strong style={{ fontSize: 15 }}>{s.day}</strong>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, opacity: s.active ? 1 : 0.4 }}>
-                    <span style={{ fontSize: 12, color: 'var(--muted)' }}>Mulai</span>
+                    <span style={{ fontSize: 12, color: 'var(--muted)' }}>Start</span>
                     <input type="time" value={s.startTime} onChange={e => updateField(i, 'startTime', e.target.value)}
                       disabled={!s.active} className="msPick" style={{ border: '1px solid var(--border)', outline: 'none', background: 'var(--paper)' }}/>
                     <span style={{ color: 'var(--muted)' }}>→</span>
@@ -122,14 +122,14 @@ const DoctorSchedule = () => {
                     <span style={{ fontSize: 12, color: 'var(--muted)' }}>Slot</span>
                     <select value={s.slotDuration} onChange={e => updateField(i, 'slotDuration', Number(e.target.value))}
                       disabled={!s.active} className="msPick" style={{ border: '1px solid var(--border)', outline: 'none', background: 'var(--paper)' }}>
-                      {[15, 20, 30, 45, 60].map(v => <option key={v} value={v}>{v} mnt</option>)}
+                      {[15, 20, 30, 45, 60].map(v => <option key={v} value={v}>{v} min</option>)}
                     </select>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 130, opacity: s.active ? 1 : 0.4 }}>
-                    <span style={{ fontSize: 12, color: 'var(--muted)' }}>Maks</span>
+                    <span style={{ fontSize: 12, color: 'var(--muted)' }}>Max</span>
                     <input type="number" min={1} max={30} value={s.maxPatients} onChange={e => updateField(i, 'maxPatients', Number(e.target.value))}
                       disabled={!s.active} className="msPick" style={{ width: 60, border: '1px solid var(--border)', outline: 'none', background: 'var(--paper)' }}/>
-                    <span style={{ fontSize: 12, color: 'var(--muted)' }}>pasien</span>
+                    <span style={{ fontSize: 12, color: 'var(--muted)' }}>patients</span>
                   </div>
                 </div>
               ))}
@@ -138,9 +138,9 @@ const DoctorSchedule = () => {
 
           <div className="msStack-sm">
             <Card>
-              <div className="msEyebrow">Kapasitas mingguan</div>
+              <div className="msEyebrow">Weekly capacity</div>
               <div style={{ fontFamily: 'var(--serif)', fontSize: 36, marginTop: 6, fontWeight: 600 }}>
-                {totalSlots} <span style={{ fontSize: 16, color: 'var(--muted)' }}>slot / minggu</span>
+                {totalSlots} <span style={{ fontSize: 16, color: 'var(--muted)' }}>slots / week</span>
               </div>
               <div style={{ marginTop: 16, display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
                 {schedule.sort((a, b) => a.dayOfWeek - b.dayOfWeek).map((s) => (
@@ -159,7 +159,7 @@ const DoctorSchedule = () => {
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginTop: 10 }}>
                 <Icon name="info" size={16} style={{ color: 'var(--accent)', marginTop: 2 }}/>
                 <p style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.6, margin: 0 }}>
-                  Pasien hanya bisa booking di hari dan waktu yang kamu aktifkan. Perubahan berlaku untuk slot yang belum dipesan.
+                  Patients can only book on the days and times you have enabled. Changes apply to slots that have not yet been booked.
                 </p>
               </div>
             </Card>

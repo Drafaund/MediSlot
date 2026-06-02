@@ -6,10 +6,10 @@ import { Icon, Card, Badge, Avatar, Btn, Empty, Toast } from '../components/ui';
 
 const statusBadge = (status) => {
   switch (status) {
-    case 'confirmed': return <Badge tone="sage" icon="check-circ">Dikonfirmasi</Badge>;
-    case 'pending': return <Badge tone="amber" icon="clock">Menunggu konfirmasi</Badge>;
-    case 'cancelled': return <Badge tone="coral" icon="x">Dibatalkan</Badge>;
-    case 'completed': return <Badge tone="neutral" icon="check">Selesai</Badge>;
+    case 'confirmed': return <Badge tone="sage" icon="check-circ">Confirmed</Badge>;
+    case 'pending': return <Badge tone="amber" icon="clock">Awaiting confirmation</Badge>;
+    case 'cancelled': return <Badge tone="coral" icon="x">Cancelled</Badge>;
+    case 'completed': return <Badge tone="neutral" icon="check">Completed</Badge>;
     default: return <Badge tone="neutral">{status}</Badge>;
   }
 };
@@ -35,23 +35,23 @@ const PatientDashboard = () => {
     try {
       await api.put(`/appointments/${id}/status`, { status: 'cancelled' });
       setAppointments(prev => prev.map(a => a._id === id ? { ...a, status: 'cancelled' } : a));
-      setToast('Appointment berhasil dibatalkan');
+      setToast('Appointment successfully cancelled');
     } catch {
-      setToast('Gagal membatalkan appointment');
+      setToast('Failed to cancel appointment');
     }
   };
 
-  const formatDate = (d) => new Date(d).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const formatDate = (d) => new Date(d).toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
   return (
     <div className="msStack-md">
       <div>
         <div className="msEyebrow">Appointment</div>
-        <h1 className="msPageTitle">Booking saya</h1>
+        <h1 className="msPageTitle">My bookings</h1>
       </div>
 
       <div className="msTabs">
-        {[['upcoming', `Aktif (${upcoming.length})`], ['past', `Selesai (${past.length})`]].map(([v, l]) => (
+        {[['upcoming', `Active (${upcoming.length})`], ['past', `Completed (${past.length})`]].map(([v, l]) => (
           <button key={v} className={`msTab ${tab === v ? 'msTab-active' : ''}`} onClick={() => setTab(v)}>{l}</button>
         ))}
       </div>
@@ -64,8 +64,8 @@ const PatientDashboard = () => {
 
       {!loading && tab === 'upcoming' && (
         upcoming.length === 0 ? (
-          <Empty icon="calendar" title="Belum ada appointment aktif" sub="Booking dokter untuk mulai"
-            action={<Btn variant="primary" icon="search" onClick={() => navigate('/doctors')}>Cari dokter</Btn>}/>
+          <Empty icon="calendar" title="No active appointments" sub="Book a doctor to get started"
+            action={<Btn variant="primary" icon="search" onClick={() => navigate('/doctors')}>Find a doctor</Btn>}/>
         ) : (
           <div className="msStack-sm">
             {upcoming.map(a => {
@@ -83,20 +83,20 @@ const PatientDashboard = () => {
                       textAlign: 'center', flexShrink: 0,
                     }}>
                       <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase' }}>
-                        {new Date(a.date).toLocaleDateString('id-ID', { weekday: 'short' })}
+                        {new Date(a.date).toLocaleDateString('en-US', { weekday: 'short' })}
                       </div>
                       <div style={{ fontFamily: 'var(--serif)', fontSize: 28, lineHeight: 1, margin: '4px 0' }}>
                         {new Date(a.date).getDate()}
                       </div>
                       <div style={{ fontSize: 10, fontWeight: 600 }}>
-                        {new Date(a.date).toLocaleDateString('id-ID', { month: 'short' })}
+                        {new Date(a.date).toLocaleDateString('en-US', { month: 'short' })}
                       </div>
                     </div>
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                         {statusBadge(a.status)}
                         <span style={{ color: 'var(--muted)', fontSize: 13 }}>
-                          <Icon name="clock" size={12}/> {a.timeSlot} WIB
+                          <Icon name="clock" size={12}/> {a.timeSlot}
                         </span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
@@ -108,14 +108,14 @@ const PatientDashboard = () => {
                       </div>
                       {a.notes && (
                         <div style={{ fontSize: 13, color: 'var(--ink-2)', padding: '8px 12px', background: 'var(--bg-2)', borderRadius: 8 }}>
-                          <span style={{ color: 'var(--muted)' }}>Catatan: </span>{a.notes}
+                          <span style={{ color: 'var(--muted)' }}>Notes: </span>{a.notes}
                         </div>
                       )}
                     </div>
                     <div style={{ textAlign: 'right', minWidth: 120 }}>
                       {a.queueNumber && (
                         <>
-                          <div className="msEyebrow">Antrian</div>
+                          <div className="msEyebrow">Queue</div>
                           <div style={{ fontFamily: 'var(--mono)', fontSize: 36, fontWeight: 700, lineHeight: 1, marginTop: 2 }}>
                             #{String(a.queueNumber).padStart(2, '0')}
                           </div>
@@ -123,7 +123,7 @@ const PatientDashboard = () => {
                       )}
                       <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', marginTop: 10 }}>
                         {a.status === 'confirmed' || a.status === 'pending' ? (
-                          <Btn variant="ghost" size="sm" icon="x" onClick={() => handleCancel(a._id)}>Batal</Btn>
+                          <Btn variant="ghost" size="sm" icon="x" onClick={() => handleCancel(a._id)}>Cancel</Btn>
                         ) : null}
                       </div>
                     </div>
@@ -137,7 +137,7 @@ const PatientDashboard = () => {
 
       {!loading && tab === 'past' && (
         past.length === 0 ? (
-          <Empty icon="file" title="Belum ada riwayat appointment"/>
+          <Empty icon="file" title="No appointment history"/>
         ) : (
           <div className="msStack-sm">
             {past.map(a => {
@@ -156,7 +156,7 @@ const PatientDashboard = () => {
                     </div>
                     {statusBadge(a.status)}
                     {a.status === 'completed' && (
-                      <Btn variant="ghost" iconRight="arrow-r" size="sm">Lihat rekam medis</Btn>
+                      <Btn variant="ghost" iconRight="arrow-r" size="sm">View medical record</Btn>
                     )}
                   </div>
                 </Card>

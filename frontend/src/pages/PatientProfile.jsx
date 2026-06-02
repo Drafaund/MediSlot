@@ -5,7 +5,7 @@ import api from '../services/api';
 import { Icon, Card, Btn, Input, Toast } from '../components/ui';
 
 const BLOOD_TYPES = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
-const GENDERS    = ['Laki-laki', 'Perempuan'];
+const GENDERS    = ['Male', 'Female'];
 
 const calcAge = (dob) => {
   if (!dob) return null;
@@ -62,10 +62,10 @@ const PatientProfile = () => {
     setSaving(true);
     try {
       await api.put('/auth/profile', form);
-      await refreshUser();   // perbarui user context agar form tidak reset ke data lama
-      setToast('Profil berhasil disimpan');
+      await refreshUser();   // refresh user context so form doesn't reset to old data
+      setToast('Profile saved successfully');
     } catch (err) {
-      setToast(err.response?.data?.message || 'Gagal menyimpan profil');
+      setToast(err.response?.data?.message || 'Failed to save profile');
     } finally {
       setSaving(false);
     }
@@ -78,58 +78,58 @@ const PatientProfile = () => {
   return (
     <div className="msStack-md" style={{ maxWidth: 680 }}>
       <div>
-        <div className="msEyebrow">Akun Pasien</div>
-        <h1 className="msPageTitle">{isOnboarding ? 'Lengkapi profil Anda' : 'Profil saya'}</h1>
+        <div className="msEyebrow">Patient Account</div>
+        <h1 className="msPageTitle">{isOnboarding ? 'Complete your profile' : 'My profile'}</h1>
         <p style={{ color: 'var(--muted)', marginTop: 6 }}>
-          Informasi ini membantu dokter memberikan penanganan yang tepat.
+          This information helps doctors provide the right care.
         </p>
       </div>
 
-      {/* Banner onboarding */}
+      {/* Onboarding banner */}
       {isOnboarding && (
         <div style={{ display: 'flex', gap: 14, padding: '16px 20px', background: 'var(--accent-soft)', borderRadius: 12, border: '1px solid var(--accent)' }}>
           <Icon name="info" size={20} style={{ color: 'var(--accent)', flexShrink: 0, marginTop: 2 }}/>
           <div>
-            <div style={{ fontWeight: 600, color: 'var(--accent)', marginBottom: 4 }}>Selamat datang di MediSlot!</div>
+            <div style={{ fontWeight: 600, color: 'var(--accent)', marginBottom: 4 }}>Welcome to MediSlot!</div>
             <div style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.6 }}>
-              Sebelum booking dokter, lengkapi data diri Anda terlebih dahulu.
-              Data ini membantu dokter mempersiapkan pemeriksaan yang tepat.
+              Before booking a doctor, please complete your personal data.
+              This data helps doctors prepare the right examination.
               <br/>
-              <strong>Wajib diisi:</strong> Tanggal lahir dan jenis kelamin.
+              <strong>Required:</strong> Date of birth and gender.
             </div>
           </div>
         </div>
       )}
 
-      {/* Indikator kelengkapan */}
+      {/* Completeness indicator */}
       {!isProfileComplete && (
         <div style={{ display: 'flex', gap: 10, padding: '10px 16px', background: '#FEF3C7', borderRadius: 10, border: '1px solid #FCD34D', alignItems: 'center' }}>
           <Icon name="warn" size={16} style={{ color: '#92400E', flexShrink: 0 }}/>
           <span style={{ fontSize: 13, color: '#92400E' }}>
-            Profil belum lengkap — isi <strong>tanggal lahir</strong> dan <strong>jenis kelamin</strong> untuk bisa booking dokter.
+            Profile incomplete — fill in <strong>date of birth</strong> and <strong>gender</strong> to be able to book a doctor.
           </span>
         </div>
       )}
 
-      {/* Info dasar */}
+      {/* Basic info */}
       <Card>
-        <div style={{ fontFamily: 'var(--serif)', fontSize: 17, marginBottom: 16 }}>Informasi dasar</div>
+        <div style={{ fontFamily: 'var(--serif)', fontSize: 17, marginBottom: 16 }}>Basic information</div>
         <div className="msStack-sm">
-          <Input label="Nama lengkap" value={form.name} onChange={v => set('name', v)} placeholder="Sri Lestari"/>
-          <Input label="Nomor telepon" value={form.phone} onChange={v => set('phone', v)} placeholder="081234567890"/>
+          <Input label="Full name" value={form.name} onChange={v => set('name', v)} placeholder="Jane Doe"/>
+          <Input label="Phone number" value={form.phone} onChange={v => set('phone', v)} placeholder="081234567890"/>
         </div>
       </Card>
 
-      {/* Data medis */}
+      {/* Medical data */}
       <Card>
-        <div style={{ fontFamily: 'var(--serif)', fontSize: 17, marginBottom: 16 }}>Data medis</div>
+        <div style={{ fontFamily: 'var(--serif)', fontSize: 17, marginBottom: 16 }}>Medical data</div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
           <div>
-            <Input label={`Tanggal lahir${age != null ? ` (${age} tahun)` : ''}`}
+            <Input label={`Date of birth${age != null ? ` (${age} years old)` : ''}`}
               type="date" value={form.dateOfBirth} onChange={v => set('dateOfBirth', v)}/>
           </div>
           <div>
-            <label className="msField-lbl">Jenis kelamin</label>
+            <label className="msField-lbl">Gender</label>
             <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
               {GENDERS.map(g => (
                 <button key={g} type="button" onClick={() => set('gender', g)}
@@ -146,7 +146,7 @@ const PatientProfile = () => {
             </div>
           </div>
           <div>
-            <label className="msField-lbl">Golongan darah</label>
+            <label className="msField-lbl">Blood type</label>
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 6 }}>
               {BLOOD_TYPES.map(bt => (
                 <button key={bt} type="button" onClick={() => set('bloodType', bt)}
@@ -171,11 +171,11 @@ const PatientProfile = () => {
         </div>
       </Card>
 
-      {/* Alergi */}
+      {/* Allergies */}
       <Card>
-        <div style={{ fontFamily: 'var(--serif)', fontSize: 17, marginBottom: 6 }}>Alergi yang diketahui</div>
+        <div style={{ fontFamily: 'var(--serif)', fontSize: 17, marginBottom: 6 }}>Known allergies</div>
         <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 14 }}>
-          Informasikan obat, makanan, atau zat yang menyebabkan reaksi alergi.
+          Inform about medicines, foods, or substances that cause allergic reactions.
         </div>
 
         <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
@@ -183,14 +183,14 @@ const PatientProfile = () => {
             value={allergyInput}
             onChange={e => setAllergyInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addAllergy())}
-            placeholder="Contoh: Penisilin, Seafood, Debu…"
+            placeholder="Example: Penicillin, Seafood, Dust…"
             style={{ flex: 1, border: '1px solid var(--border)', borderRadius: 8, padding: '9px 12px', fontSize: 14, background: 'var(--paper)', outline: 'none' }}
           />
-          <Btn variant="secondary" onClick={addAllergy}>Tambah</Btn>
+          <Btn variant="secondary" onClick={addAllergy}>Add</Btn>
         </div>
 
         {form.allergies.length === 0 ? (
-          <div style={{ fontSize: 13, color: 'var(--muted)', fontStyle: 'italic' }}>Belum ada alergi yang dicatat.</div>
+          <div style={{ fontSize: 13, color: 'var(--muted)', fontStyle: 'italic' }}>No allergies recorded yet.</div>
         ) : (
           <div className="msChip-row">
             {form.allergies.map(a => (
@@ -208,7 +208,7 @@ const PatientProfile = () => {
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
         {isOnboarding && isProfileComplete && (
-          <Btn variant="ghost" onClick={() => navigate('/')}>Lewati</Btn>
+          <Btn variant="ghost" onClick={() => navigate('/')}>Skip</Btn>
         )}
         <Btn variant="primary" icon="check" disabled={saving} onClick={async () => {
           await handleSave();
@@ -216,7 +216,7 @@ const PatientProfile = () => {
             setTimeout(() => navigate('/doctors'), 1200);
           }
         }}>
-          {saving ? 'Menyimpan…' : isOnboarding ? 'Simpan & mulai cari dokter' : 'Simpan profil'}
+          {saving ? 'Saving…' : isOnboarding ? 'Save & start finding doctors' : 'Save profile'}
         </Btn>
       </div>
 

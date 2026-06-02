@@ -18,14 +18,14 @@ const GoogleSuccess = () => {
 
   useEffect(() => {
     if (user) {
-      // Redirect berdasarkan role
+      // Redirect based on role
       navigate(user.role === 'doctor' ? '/doctor/dashboard' : '/dashboard');
     }
   }, [user]);
 
   return (
     <div style={{ textAlign: 'center', padding: '3rem' }}>
-      <p>Memproses login Google...</p>
+      <p>Processing Google login...</p>
     </div>
   );
 };

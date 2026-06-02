@@ -8,21 +8,21 @@ const AVATAR_COLORS = { patient: 'mauve', doctor: 'sage', admin: 'ocean' };
 
 const SIDEBAR_ITEMS = {
   patient: [
-    { path: '/', icon: 'home', label: 'Beranda' },
-    { path: '/symptom-checker', icon: 'sparkles', label: 'Cek Gejala (AI)' },
-    { path: '/doctors', icon: 'search', label: 'Cari Dokter' },
+    { path: '/', icon: 'home', label: 'Home' },
+    { path: '/symptom-checker', icon: 'sparkles', label: 'Check Symptoms (AI)' },
+    { path: '/doctors', icon: 'search', label: 'Find Doctor' },
     { path: '/dashboard', icon: 'calendar', label: 'Appointment' },
-    { path: '/medical-history', icon: 'file', label: 'Riwayat Kesehatan' },
+    { path: '/medical-history', icon: 'file', label: 'Health History' },
   ],
   doctor: [
     { path: '/doctor/dashboard', icon: 'home', label: 'Dashboard' },
-    { path: '/doctor/schedule', icon: 'calendar', label: 'Jadwal Praktik' },
-    { path: '/doctor/profile', icon: 'user', label: 'Profil Saya' },
+    { path: '/doctor/schedule', icon: 'calendar', label: 'Practice Schedule' },
+    { path: '/doctor/profile', icon: 'user', label: 'My Profile' },
   ],
   admin: [
-    { path: '/admin/verify', icon: 'shield', label: 'Verifikasi Dokter' },
-    { path: '/admin/doctors', icon: 'stetho', label: 'Semua Dokter' },
-    { path: '/admin/users', icon: 'users', label: 'Pengguna' },
+    { path: '/admin/verify', icon: 'shield', label: 'Verify Doctors' },
+    { path: '/admin/doctors', icon: 'stetho', label: 'All Doctors' },
+    { path: '/admin/users', icon: 'users', label: 'Users' },
   ],
 };
 
@@ -32,7 +32,7 @@ const Sidebar = ({ open = false, onClose }) => {
   const location = useLocation();
   const [pendingCount, setPendingCount] = useState(0);
 
-  // Fetch jumlah dokter pending verifikasi — hanya untuk admin
+  // Fetch number of doctors pending verification — admin only
   useEffect(() => {
     if (user?.role !== 'admin') return;
     api.get('/doctors/admin/all')
@@ -41,7 +41,7 @@ const Sidebar = ({ open = false, onClose }) => {
         setPendingCount(count);
       })
       .catch(() => {});
-  }, [user, location.pathname]); // refresh saat navigasi agar badge update setelah verifikasi
+  }, [user, location.pathname]); // refresh on navigation so badge updates after verification
 
   if (!user) return null;
 
@@ -93,10 +93,10 @@ const Sidebar = ({ open = false, onClose }) => {
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.name}</div>
             <div style={{ fontSize: 11, color: 'var(--muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {role === 'patient' ? 'Pasien' : role === 'doctor' ? 'Dokter' : 'Admin'}
+              {role === 'patient' ? 'Patient' : role === 'doctor' ? 'Doctor' : 'Admin'}
             </div>
           </div>
-          <button className="msIcon-btn" onClick={() => { logout(); navigate('/login'); }} title="Keluar">
+          <button className="msIcon-btn" onClick={() => { logout(); navigate('/login'); }} title="Logout">
             <Icon name="logout" size={14}/>
           </button>
         </div>

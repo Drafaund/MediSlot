@@ -5,7 +5,7 @@ import api from '../services/api';
 import { Icon, Card, Badge, Avatar, Btn, SectionHeader, Empty, formatIDR } from '../components/ui';
 import { formatDoctorName } from '../utils/doctorName';
 
-const DAYS = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 const DoctorDetail = () => {
   const { id } = useParams();
@@ -28,7 +28,7 @@ const DoctorDetail = () => {
           setSlots(slotsRes.data.data?.slice(0, 3) || []);
         } catch { /* no slots available */ }
       } catch {
-        setError('Dokter tidak ditemukan.');
+        setError('Doctor not found.');
       } finally {
         setLoading(false);
       }
@@ -36,8 +36,8 @@ const DoctorDetail = () => {
     fetchDoctor();
   }, [id]);
 
-  if (loading) return <div style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>Memuat profil dokter…</div>;
-  if (error || !doctor) return <Empty icon="user" title="Dokter tidak ditemukan" sub={error} action={<Btn variant="secondary" onClick={() => navigate('/doctors')}>Kembali ke pencarian</Btn>}/>;
+  if (loading) return <div style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>Loading doctor profile…</div>;
+  if (error || !doctor) return <Empty icon="user" title="Doctor not found" sub={error} action={<Btn variant="secondary" onClick={() => navigate('/doctors')}>Back to search</Btn>}/>;
 
   const d = doctor;
   const initials = d.userId?.name?.split(' ').map(x => x[0]).slice(0, 2).join('') || d.name?.split(' ').map(x => x[0]).slice(0, 2).join('') || 'Dr';
@@ -48,7 +48,7 @@ const DoctorDetail = () => {
   return (
     <div className="msStack-md" style={{ maxWidth: 1040 }}>
       <button className="msBack" onClick={() => navigate('/doctors')}>
-        <Icon name="chevron-l" size={16}/> Kembali ke pencarian
+        <Icon name="chevron-l" size={16}/> Back to search
       </button>
 
       <Card>
@@ -56,12 +56,12 @@ const DoctorDetail = () => {
           <Avatar initials={initials} color="sage" size={88} ring/>
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-              <Badge tone="sage" icon="check-circ">Terverifikasi</Badge>
-              {d.acceptBPJS && <Badge tone="ink" icon="shield">Menerima BPJS</Badge>}
+              <Badge tone="sage" icon="check-circ">Verified</Badge>
+              {d.acceptBPJS && <Badge tone="ink" icon="shield">Accepts BPJS</Badge>}
             </div>
             <h1 style={{ fontFamily: 'var(--serif)', fontSize: 32, fontWeight: 600, lineHeight: 1.1 }}>{doctorName}</h1>
             <div style={{ color: 'var(--muted)', marginTop: 6, fontSize: 15 }}>
-              {d.specialization}{d.yearsOfExperience > 0 ? ` · ${d.yearsOfExperience} tahun pengalaman` : ''}
+              {d.specialization}{d.yearsOfExperience > 0 ? ` · ${d.yearsOfExperience} years of experience` : ''}
             </div>
             <div style={{ display: 'flex', gap: 24, marginTop: 16, alignItems: 'center' }}>
               <div style={{ color: 'var(--muted)', fontSize: 14, display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -73,19 +73,19 @@ const DoctorDetail = () => {
             </div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div className="msEyebrow">Tarif konsultasi</div>
+            <div className="msEyebrow">Consultation fee</div>
             <div style={{ fontFamily: 'var(--serif)', fontSize: 28, marginTop: 4 }}>{formatIDR(d.consultationFee || 0)}</div>
-            <div style={{ color: 'var(--muted)', fontSize: 12, marginTop: 2 }}>per sesi · sudah termasuk pemeriksaan</div>
+            <div style={{ color: 'var(--muted)', fontSize: 12, marginTop: 2 }}>per session · includes examination</div>
           </div>
         </div>
       </Card>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: 16 }}>
         <Card>
-          <div className="msEyebrow">Tentang dokter</div>
-          <p style={{ marginTop: 10, lineHeight: 1.65, color: 'var(--ink-2)' }}>{d.bio || 'Dokter berpengalaman di bidangnya, menerima pasien dengan penuh perhatian.'}</p>
+          <div className="msEyebrow">About the doctor</div>
+          <p style={{ marginTop: 10, lineHeight: 1.65, color: 'var(--ink-2)' }}>{d.bio || 'An experienced doctor in their field, receiving patients with full attention.'}</p>
 
-          <div style={{ marginTop: 24 }} className="msEyebrow">Lokasi praktik</div>
+          <div style={{ marginTop: 24 }} className="msEyebrow">Practice location</div>
           <div style={{ marginTop: 10, display: 'flex', alignItems: 'flex-start', gap: 12 }}>
             <div style={{ width: 40, height: 40, borderRadius: 10, background: 'var(--accent-soft)', color: 'var(--accent)', display: 'grid', placeItems: 'center' }}>
               <Icon name="pin" size={18}/>
@@ -96,7 +96,7 @@ const DoctorDetail = () => {
             </div>
           </div>
 
-          <div style={{ marginTop: 24 }} className="msEyebrow">Jadwal praktik</div>
+          <div style={{ marginTop: 24 }} className="msEyebrow">Practice schedule</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6, marginTop: 10 }}>
             {DAYS.map((day, i) => {
               const active = activeDays.includes(i);
@@ -117,15 +117,15 @@ const DoctorDetail = () => {
         </Card>
 
         <Card>
-          <div className="msEyebrow" style={{ marginBottom: 12 }}>Pilih jadwal</div>
-          <div style={{ fontFamily: 'var(--serif)', fontSize: 18, marginBottom: 16 }}>Slot terdekat tersedia:</div>
+          <div className="msEyebrow" style={{ marginBottom: 12 }}>Choose a schedule</div>
+          <div style={{ fontFamily: 'var(--serif)', fontSize: 18, marginBottom: 16 }}>Next available slots:</div>
           {slots.length > 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {slots.map((s, i) => (
                 <button key={i} className="msSlot-line" onClick={() => navigate(`/booking/${id}`)}>
                   <div>
                     <div style={{ fontWeight: 600, fontSize: 14 }}>{s.time || s}</div>
-                    <div style={{ fontSize: 12, color: 'var(--muted)' }}>{s.date || 'Tersedia'}</div>
+                    <div style={{ fontSize: 12, color: 'var(--muted)' }}>{s.date || 'Available'}</div>
                   </div>
                   <Icon name="chevron-r" size={16}/>
                 </button>
@@ -133,16 +133,16 @@ const DoctorDetail = () => {
             </div>
           ) : (
             <div style={{ padding: '12px 0', color: 'var(--muted)', fontSize: 14 }}>
-              Jadwal tersedia — klik tombol di bawah untuk melihat semua slot
+              Schedule available — click the button below to see all slots
             </div>
           )}
           {user ? (
             <Btn variant="primary" icon="calendar" full size="lg" style={{ marginTop: 16 }} onClick={() => navigate(`/booking/${id}`)}>
-              Lihat semua tanggal & booking
+              View all dates & book
             </Btn>
           ) : (
             <Btn variant="primary" icon="calendar" full size="lg" style={{ marginTop: 16 }} onClick={() => navigate('/login')}>
-              Masuk untuk booking
+              Sign in to book
             </Btn>
           )}
         </Card>

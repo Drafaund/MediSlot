@@ -4,9 +4,9 @@ import { Icon, Card, Badge, Avatar, Btn, Empty, Toast } from '../components/ui';
 import { formatDoctorName } from '../utils/doctorName';
 
 const STATUS_BADGE = {
-  verified: <Badge tone="sage" icon="check-circ">Terverifikasi</Badge>,
-  pending:  <Badge tone="amber" icon="clock">Menunggu</Badge>,
-  rejected: <Badge tone="coral" icon="x">Ditolak</Badge>,
+  verified: <Badge tone="sage" icon="check-circ">Verified</Badge>,
+  pending:  <Badge tone="amber" icon="clock">Pending</Badge>,
+  rejected: <Badge tone="coral" icon="x">Rejected</Badge>,
 };
 
 const AdminDoctors = () => {
@@ -26,9 +26,9 @@ const AdminDoctors = () => {
     try {
       const { data } = await api.put(`/doctors/${id}/verify`, { isVerified });
       setDoctors(prev => prev.map(d => d._id === id ? { ...d, isVerified: data.data.isVerified, verificationStatus: data.data.verificationStatus } : d));
-      setToast(isVerified ? 'Dokter berhasil diverifikasi' : 'Verifikasi dibatalkan');
+      setToast(isVerified ? 'Doctor successfully verified' : 'Verification cancelled');
     } catch {
-      setToast('Gagal mengubah status verifikasi');
+      setToast('Failed to change verification status');
     }
   };
 
@@ -49,20 +49,20 @@ const AdminDoctors = () => {
   return (
     <div className="msStack-md">
       <div>
-        <div className="msEyebrow">Admin · Manajemen Dokter</div>
-        <h1 className="msPageTitle">Semua dokter</h1>
+        <div className="msEyebrow">Admin · Doctor Management</div>
+        <h1 className="msPageTitle">All doctors</h1>
         <p style={{ color: 'var(--muted)', marginTop: 6 }}>
-          {doctors.length} dokter terdaftar di platform
+          {doctors.length} doctors registered on the platform
         </p>
       </div>
 
       {/* Filter tabs */}
       <div className="msTabs">
         {[
-          ['all', `Semua (${counts.all})`],
-          ['verified', `Terverifikasi (${counts.verified})`],
-          ['pending', `Menunggu (${counts.pending})`],
-          ['rejected', `Ditolak (${counts.rejected})`],
+          ['all', `All (${counts.all})`],
+          ['verified', `Verified (${counts.verified})`],
+          ['pending', `Pending (${counts.pending})`],
+          ['rejected', `Rejected (${counts.rejected})`],
         ].map(([v, l]) => (
           <button key={v} className={`msTab ${filter === v ? 'msTab-active' : ''}`} onClick={() => setFilter(v)}>{l}</button>
         ))}
@@ -71,7 +71,7 @@ const AdminDoctors = () => {
       {loading ? (
         <div style={{ height: 300, borderRadius: 14, background: 'var(--bg-2)' }}/>
       ) : filtered.length === 0 ? (
-        <Empty icon="stetho" title="Tidak ada dokter" sub="Tidak ada dokter dengan status ini"/>
+        <Empty icon="stetho" title="No doctors found" sub="No doctors with this status"/>
       ) : (
         <Card padded={false}>
           {filtered.map((d, i) => {
@@ -96,11 +96,11 @@ const AdminDoctors = () => {
                   {STATUS_BADGE[d.verificationStatus] || <Badge tone="neutral">{d.verificationStatus}</Badge>}
                   {d.verificationStatus !== 'verified' ? (
                     <Btn variant="secondary" size="sm" icon="check" onClick={() => handleVerify(d._id, true)}>
-                      Verifikasi
+                      Verify
                     </Btn>
                   ) : (
                     <Btn variant="ghost" size="sm" onClick={() => handleVerify(d._id, false)}>
-                      Batalkan
+                      Revoke
                     </Btn>
                   )}
                 </div>

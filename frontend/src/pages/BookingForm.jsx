@@ -10,8 +10,8 @@ const generateDates = () => {
     const d = new Date();
     d.setDate(d.getDate() + i);
     dates.push({
-      label: i === 0 ? 'Hari ini' : i === 1 ? 'Besok' : d.toLocaleDateString('id-ID', { weekday: 'short' }),
-      date: d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }),
+      label: i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : d.toLocaleDateString('en-US', { weekday: 'short' }),
+      date: d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' }),
       dateStr: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`,
       dayNum: d.getDate(),
     });
@@ -24,7 +24,7 @@ const BookingForm = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  // Semua hooks harus dipanggil sebelum return kondisional apapun (Rules of Hooks)
+  // All hooks must be called before any conditional return (Rules of Hooks)
   const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -39,7 +39,7 @@ const BookingForm = () => {
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [bookedAppt, setBookedAppt] = useState(null);
 
-  // Cek profil setelah semua hooks — bukan sebelumnya
+  // Check profile after all hooks — not before
   const profileIncomplete = !user?.dateOfBirth || !user?.gender;
 
   useEffect(() => {
@@ -77,17 +77,17 @@ const BookingForm = () => {
       setBookedAppt(data.data);
       setStep('done');
     } catch (err) {
-      alert(err.response?.data?.message || 'Gagal booking, coba lagi.');
+      alert(err.response?.data?.message || 'Booking failed, please try again.');
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (loading) return <div style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>Memuat…</div>;
-  if (!doctor) return <Empty icon="user" title="Dokter tidak ditemukan" action={<Btn variant="secondary" onClick={() => navigate('/doctors')}>Kembali</Btn>}/>;
+  if (loading) return <div style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>Loading…</div>;
+  if (!doctor) return <Empty icon="user" title="Doctor not found" action={<Btn variant="secondary" onClick={() => navigate('/doctors')}>Back</Btn>}/>;
 
   const d = doctor;
-  const doctorName = d.userId?.name || d.name || 'Dokter';
+  const doctorName = d.userId?.name || d.name || 'Doctor';
   const initials = doctorName.split(' ').map(x => x[0]).slice(0, 2).join('');
 
   const slotTimes = availableSlots.length > 0
@@ -98,23 +98,23 @@ const BookingForm = () => {
         { time: '14.30', taken: false }, { time: '15.00', taken: false },
       ];
 
-  // Guard profil — setelah semua hooks
+  // Profile guard — after all hooks
   if (profileIncomplete) {
     return (
       <div style={{ maxWidth: 540, margin: '60px auto', textAlign: 'center' }}>
         <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--accent-soft)', display: 'grid', placeItems: 'center', margin: '0 auto 20px' }}>
           <Icon name="user" size={28} style={{ color: 'var(--accent)' }}/>
         </div>
-        <h2 style={{ fontFamily: 'var(--serif)', fontSize: 26, marginBottom: 10 }}>Lengkapi profil dulu</h2>
+        <h2 style={{ fontFamily: 'var(--serif)', fontSize: 26, marginBottom: 10 }}>Complete your profile first</h2>
         <p style={{ color: 'var(--muted)', lineHeight: 1.6, marginBottom: 24 }}>
-          Sebelum booking, Anda perlu mengisi tanggal lahir dan jenis kelamin.
-          Data ini penting agar dokter bisa mempersiapkan pemeriksaan yang tepat.
+          Before booking, you need to fill in your date of birth and gender.
+          This information is important so the doctor can prepare the right examination.
         </p>
         <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
           <Btn variant="primary" icon="user" onClick={() => navigate('/profile?onboarding=true')}>
-            Lengkapi profil sekarang
+            Complete profile now
           </Btn>
-          <Btn variant="ghost" onClick={() => navigate(-1)}>Kembali</Btn>
+          <Btn variant="ghost" onClick={() => navigate(-1)}>Back</Btn>
         </div>
       </div>
     );
@@ -127,20 +127,20 @@ const BookingForm = () => {
           <Icon name="check" size={36} stroke={2}/>
         </div>
         <h1 style={{ fontFamily: 'var(--serif)', fontSize: 38, fontWeight: 600, marginTop: 24, lineHeight: 1.1 }}>
-          <span style={{ color: 'var(--accent)' }}>Berhasil!</span> Appointment kamu sudah dibooking.
+          <span style={{ color: 'var(--accent)' }}>Success!</span> Your appointment has been booked.
         </h1>
         <p style={{ color: 'var(--muted)', marginTop: 12, fontSize: 15 }}>
-          Konfirmasi telah dikirim ke email kamu. Klinik akan menghubungi jika perlu.
+          Confirmation has been sent to your email. The clinic will contact you if needed.
         </p>
         <Card style={{ marginTop: 32, textAlign: 'left' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 16, borderBottom: '1px dashed var(--border)' }}>
             <div>
-              <div className="msEyebrow">Nomor antrian virtual</div>
+              <div className="msEyebrow">Virtual queue number</div>
               <div style={{ fontFamily: 'var(--mono)', fontSize: 56, fontWeight: 700, lineHeight: 1, color: 'var(--accent)', marginTop: 4 }}>
                 #{String(bookedAppt.queueNumber || 7).padStart(2, '0')}
               </div>
             </div>
-            <Badge tone="sage" icon="check-circ">Booking terkonfirmasi</Badge>
+            <Badge tone="sage" icon="check-circ">Booking confirmed</Badge>
           </div>
           <div style={{ display: 'flex', gap: 16, paddingTop: 16, alignItems: 'center' }}>
             <Avatar initials={initials} color="sage" size={48}/>
@@ -150,15 +150,15 @@ const BookingForm = () => {
             </div>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
-            <div><div className="msEyebrow">Tanggal</div><div style={{ marginTop: 4, fontWeight: 600 }}>{dates[selDateIdx].date} 2026</div></div>
-            <div><div className="msEyebrow">Waktu</div><div style={{ marginTop: 4, fontWeight: 600 }}>{selTime} WIB</div></div>
-            <div><div className="msEyebrow">Pembayaran</div><div style={{ marginTop: 4, fontWeight: 600 }}>{paymentType === 'bpjs' ? 'BPJS Kesehatan' : 'Umum'}</div></div>
-            <div><div className="msEyebrow">Biaya</div><div style={{ marginTop: 4, fontWeight: 600 }}>{paymentType === 'bpjs' ? 'Ditanggung BPJS' : formatIDR(d.consultationFee || 0)}</div></div>
+            <div><div className="msEyebrow">Date</div><div style={{ marginTop: 4, fontWeight: 600 }}>{dates[selDateIdx].date} 2026</div></div>
+            <div><div className="msEyebrow">Time</div><div style={{ marginTop: 4, fontWeight: 600 }}>{selTime}</div></div>
+            <div><div className="msEyebrow">Payment</div><div style={{ marginTop: 4, fontWeight: 600 }}>{paymentType === 'bpjs' ? 'BPJS Kesehatan' : 'General'}</div></div>
+            <div><div className="msEyebrow">Fee</div><div style={{ marginTop: 4, fontWeight: 600 }}>{paymentType === 'bpjs' ? 'Covered by BPJS' : formatIDR(d.consultationFee || 0)}</div></div>
           </div>
         </Card>
         <div style={{ display: 'flex', gap: 10, marginTop: 24, justifyContent: 'center' }}>
-          <Btn variant="primary" icon="calendar" onClick={() => navigate('/dashboard')}>Lihat appointment saya</Btn>
-          <Btn variant="ghost" onClick={() => navigate('/')}>Kembali ke beranda</Btn>
+          <Btn variant="primary" icon="calendar" onClick={() => navigate('/dashboard')}>View my appointments</Btn>
+          <Btn variant="ghost" onClick={() => navigate('/')}>Back to home</Btn>
         </div>
       </div>
     );
@@ -167,18 +167,18 @@ const BookingForm = () => {
   return (
     <div className="msStack-md" style={{ maxWidth: 1040 }}>
       <button className="msBack" onClick={() => navigate(`/doctors/${doctorId}`)}>
-        <Icon name="chevron-l" size={16}/> Kembali ke profil dokter
+        <Icon name="chevron-l" size={16}/> Back to doctor profile
       </button>
       <div>
-        <div className="msEyebrow">Booking appointment</div>
-        <h1 className="msPageTitle">Pilih jadwal dengan {doctorName}</h1>
+        <div className="msEyebrow">Book appointment</div>
+        <h1 className="msPageTitle">Choose a schedule with {doctorName}</h1>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 16, alignItems: 'flex-start' }}>
         <div className="msStack-md">
           {/* Date picker */}
           <Card>
-            <div className="msEyebrow" style={{ marginBottom: 14 }}>1 · Pilih tanggal</div>
+            <div className="msEyebrow" style={{ marginBottom: 14 }}>1 · Select date</div>
             <div className="msDateScroll">
               {dates.map((dt, i) => (
                 <button key={i} onClick={() => setSelDateIdx(i)} className={`msDate-pill ${selDateIdx === i ? 'msDate-pill-active' : ''}`}>
@@ -193,14 +193,14 @@ const BookingForm = () => {
           {/* Time picker */}
           <Card>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-              <div className="msEyebrow">2 · Pilih waktu — {dates[selDateIdx].date}</div>
+              <div className="msEyebrow">2 · Select time — {dates[selDateIdx].date}</div>
               <div style={{ display: 'flex', gap: 12, fontSize: 12, color: 'var(--muted)' }}>
-                <span><span className="msSlot-dot" style={{ background: 'var(--accent)' }}/> Dipilih</span>
-                <span><span className="msSlot-dot" style={{ background: 'var(--bg-2)' }}/> Tersedia</span>
+                <span><span className="msSlot-dot" style={{ background: 'var(--accent)' }}/> Selected</span>
+                <span><span className="msSlot-dot" style={{ background: 'var(--bg-2)' }}/> Available</span>
               </div>
             </div>
             {slotsLoading ? (
-              <div style={{ height: 100, display: 'grid', placeItems: 'center', color: 'var(--muted)' }}>Memuat slot…</div>
+              <div style={{ height: 100, display: 'grid', placeItems: 'center', color: 'var(--muted)' }}>Loading slots…</div>
             ) : (
               <div className="msSlot-grid">
                 {slotTimes.map(s => (
@@ -215,12 +215,12 @@ const BookingForm = () => {
 
           {/* Payment */}
           <Card>
-            <div className="msEyebrow" style={{ marginBottom: 14 }}>3 · Metode pembayaran</div>
+            <div className="msEyebrow" style={{ marginBottom: 14 }}>3 · Payment method</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               <button onClick={() => setPaymentType('umum')} className={`msPay ${paymentType === 'umum' ? 'msPay-active' : ''}`}>
                 <Icon name="user" size={18}/>
                 <div style={{ flex: 1, textAlign: 'left' }}>
-                  <div style={{ fontWeight: 600 }}>Umum / Pribadi</div>
+                  <div style={{ fontWeight: 600 }}>General / Personal</div>
                   <div style={{ fontSize: 12, color: 'var(--muted)' }}>{formatIDR(d.consultationFee || 0)}</div>
                 </div>
                 {paymentType === 'umum' && <Icon name="check" size={16} style={{ color: 'var(--accent)' }}/>}
@@ -230,7 +230,7 @@ const BookingForm = () => {
                 <Icon name="shield" size={18}/>
                 <div style={{ flex: 1, textAlign: 'left' }}>
                   <div style={{ fontWeight: 600 }}>BPJS Kesehatan</div>
-                  <div style={{ fontSize: 12, color: 'var(--muted)' }}>{d.acceptBPJS ? 'Ditanggung BPJS' : 'Tidak tersedia'}</div>
+                  <div style={{ fontSize: 12, color: 'var(--muted)' }}>{d.acceptBPJS ? 'Covered by BPJS' : 'Not available'}</div>
                 </div>
                 {paymentType === 'bpjs' && <Icon name="check" size={16} style={{ color: 'var(--accent)' }}/>}
               </button>
@@ -239,17 +239,17 @@ const BookingForm = () => {
 
           {/* Notes */}
           <Card>
-            <Textarea label="4 · Catatan / keluhan awal (opsional)"
-              hint="Bantu dokter mempersiapkan konsultasi — sebutkan keluhan utama atau obat yang sedang diminum."
+            <Textarea label="4 · Notes / initial complaint (optional)"
+              hint="Help the doctor prepare for the consultation — mention your main complaint or current medications."
               value={notes} onChange={setNotes} rows={3}
-              placeholder="Contoh: Kontrol diabetes rutin, mau cek HbA1c terbaru."/>
+              placeholder="Example: Regular diabetes check-up, want to check latest HbA1c."/>
           </Card>
         </div>
 
         {/* Sticky summary */}
         <div style={{ position: 'sticky', top: 24 }}>
           <Card>
-            <div className="msEyebrow">Ringkasan booking</div>
+            <div className="msEyebrow">Booking summary</div>
             <div style={{ display: 'flex', gap: 12, marginTop: 14, paddingBottom: 16, borderBottom: '1px dashed var(--border)' }}>
               <Avatar initials={initials} color="sage" size={48}/>
               <div>
@@ -258,12 +258,12 @@ const BookingForm = () => {
                 <div style={{ color: 'var(--muted)', fontSize: 12, marginTop: 2 }}>{d.clinicName}</div>
               </div>
             </div>
-            <div className="msSummary-row"><span>Tanggal</span><strong>{dates[selDateIdx].date}</strong></div>
+            <div className="msSummary-row"><span>Date</span><strong>{dates[selDateIdx].date}</strong></div>
             <div className="msSummary-row">
-              <span>Waktu</span>
-              <strong style={{ color: selTime ? 'var(--ink)' : 'var(--muted)' }}>{selTime ? `${selTime} WIB` : 'Belum dipilih'}</strong>
+              <span>Time</span>
+              <strong style={{ color: selTime ? 'var(--ink)' : 'var(--muted)' }}>{selTime ? `${selTime}` : 'Not selected'}</strong>
             </div>
-            <div className="msSummary-row"><span>Pembayaran</span><strong>{paymentType === 'bpjs' ? 'BPJS' : 'Umum'}</strong></div>
+            <div className="msSummary-row"><span>Payment</span><strong>{paymentType === 'bpjs' ? 'BPJS' : 'General'}</strong></div>
             <div className="msSummary-row" style={{ paddingTop: 14, marginTop: 6, borderTop: '1px solid var(--border)' }}>
               <span style={{ fontSize: 15 }}>Total</span>
               <strong style={{ fontSize: 20, fontFamily: 'var(--serif)', fontWeight: 600 }}>
@@ -271,10 +271,10 @@ const BookingForm = () => {
               </strong>
             </div>
             <Btn variant="primary" size="lg" full disabled={!selTime || submitting} style={{ marginTop: 16 }} onClick={handleBook} icon="check">
-              {submitting ? 'Memproses…' : 'Konfirmasi booking'}
+              {submitting ? 'Processing…' : 'Confirm booking'}
             </Btn>
             <div style={{ fontSize: 12, color: 'var(--muted)', textAlign: 'center', marginTop: 10, lineHeight: 1.5 }}>
-              Booking gratis · Bisa dibatalkan hingga 2 jam sebelum jadwal
+              Free booking · Can be cancelled up to 2 hours before schedule
             </div>
           </Card>
         </div>
