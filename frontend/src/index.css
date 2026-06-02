@@ -779,8 +779,10 @@ em { font-style: normal; color: var(--accent); }
   position: relative;
   overflow: hidden;
   display: flex;
-  align-items: flex-end;
-  padding: 60px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 72px 64px;
 }
 .msLogin-art-bg {
   position: absolute; inset: 0;
@@ -789,7 +791,49 @@ em { font-style: normal; color: var(--accent); }
     radial-gradient(ellipse at bottom left, #4A7C59 0%, transparent 60%);
   opacity: 0.35;
 }
-.msLogin-art-content { position: relative; z-index: 1; max-width: 580px; }
+.msLogin-art-content { position: relative; z-index: 1; width: 100%; }
+.msLogin-eyebrow-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 32px;
+}
+.msLogin-eyebrow-line {
+  display: inline-block;
+  width: 28px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.35;
+  flex-shrink: 0;
+}
+.msLogin-big-word {
+  font-family: var(--serif);
+  font-size: clamp(72px, 10vw, 110px);
+  font-weight: 700;
+  line-height: 0.88;
+  color: #C4DAD0;
+  letter-spacing: -0.025em;
+  margin: 2px 0 4px 0;
+}
+.msLogin-feature-dots {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.msLogin-feature-dot {
+  font-size: 11px;
+  padding: 5px 14px;
+  border-radius: 100px;
+  border: 1px solid rgba(255,255,255,0.18);
+  opacity: 0.6;
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
 .msLogin-form {
   display: flex;
   align-items: center;

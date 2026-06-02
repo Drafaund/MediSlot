@@ -151,6 +151,23 @@ const updateProfile = async (req, res) => {
   }
 };
 
+// @desc  Delete a patient account (admin only)
+// @route DELETE /api/auth/admin/users/:id
+// @access Private (admin)
+const deleteUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: 'Pengguna tidak ditemukan' });
+    if (user.role !== 'patient') {
+      return res.status(403).json({ success: false, message: 'Hanya akun pasien yang dapat dihapus' });
+    }
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: `Akun ${user.name} berhasil dihapus` });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 // @desc  Get all users (admin only)
 // @route GET /api/auth/admin/users
 // @access Private (admin)
@@ -167,4 +184,4 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-module.exports = { register, login, googleAuth, googleCallback, googleCallbackMiddleware, getMe, updateProfile, getAllUsers };
+module.exports = { register, login, googleAuth, googleCallback, googleCallbackMiddleware, getMe, updateProfile, getAllUsers, deleteUser };
