@@ -70,7 +70,8 @@ async function seed() {
       bio: 'Dokter spesialis penyakit dalam dengan fokus pada diabetes, hipertensi, dan penyakit metabolik.',
       additionalDegrees: ['M.Kes'],
       yearsOfExperience: 10,
-      isVerified: true
+      isVerified: true,
+      verificationStatus: 'verified'
     },
     {
       userId: dewi._id,
@@ -84,7 +85,8 @@ async function seed() {
       bio: 'Dokter spesialis anak dengan fokus pada tumbuh kembang anak dan penyakit infeksi pada anak.',
       additionalDegrees: [],
       yearsOfExperience: 8,
-      isVerified: true
+      isVerified: true,
+      verificationStatus: 'verified'
     },
     {
       userId: reza._id,
@@ -98,7 +100,8 @@ async function seed() {
       bio: 'Dokter spesialis kebidanan dan kandungan. Melayani pemeriksaan kehamilan, USG, dan konsultasi kesehatan reproduksi wanita.',
       additionalDegrees: ['M.Biomed'],
       yearsOfExperience: 7,
-      isVerified: true
+      isVerified: true,
+      verificationStatus: 'verified'
     }
   ]);
   const [ahmadProfile, dewiProfile, rezaProfile] = profiles;

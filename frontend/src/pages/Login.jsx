@@ -32,7 +32,16 @@ const Login = () => {
           await api.get('/doctors/my-profile');
           navigate('/doctor/dashboard');
         } catch {
-          navigate('/doctor/profile');
+          navigate('/doctor/profile?onboarding=true');
+        }
+      } else if (userData?.role === 'patient') {
+        // Pasien baru (register) → wajib isi profil dulu
+        if (mode === 'register') {
+          navigate('/profile?onboarding=true');
+        } else {
+          // Login: cek apakah profil sudah lengkap
+          const isComplete = userData.dateOfBirth && userData.gender;
+          navigate(isComplete ? '/' : '/profile?onboarding=true');
         }
       } else {
         navigate('/');

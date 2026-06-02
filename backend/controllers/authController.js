@@ -151,4 +151,20 @@ const updateProfile = async (req, res) => {
   }
 };
 
-module.exports = { register, login, googleAuth, googleCallback, googleCallbackMiddleware, getMe, updateProfile };
+// @desc  Get all users (admin only)
+// @route GET /api/auth/admin/users
+// @access Private (admin)
+const getAllUsers = async (req, res) => {
+  try {
+    const { role } = req.query;
+    const filter = role ? { role } : {};
+    const users = await User.find(filter)
+      .select('-password')
+      .sort({ createdAt: -1 });
+    res.json({ success: true, data: users });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+module.exports = { register, login, googleAuth, googleCallback, googleCallbackMiddleware, getMe, updateProfile, getAllUsers };

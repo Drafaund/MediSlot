@@ -18,8 +18,17 @@ const DoctorDashboard = () => {
   const [appointments, setAppointments] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState(null);   // DoctorProfile untuk cek status verifikasi
+  const [profileLoading, setProfileLoading] = useState(true);
 
   const today = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+  useEffect(() => {
+    api.get('/doctors/my-profile')
+      .then(({ data }) => setProfile(data.data))
+      .catch(() => setProfile(null))
+      .finally(() => setProfileLoading(false));
+  }, []);
 
   useEffect(() => {
     api.get('/appointments/doctor')
@@ -69,6 +78,55 @@ const DoctorDashboard = () => {
         </div>
         <Btn variant="secondary" icon="calendar" onClick={() => navigate('/doctor/schedule')}>Atur jadwal</Btn>
       </div>
+
+      {/* Banner status onboarding / verifikasi */}
+      {!profileLoading && !profile && (
+        <div style={{ display: 'flex', gap: 14, padding: '16px 20px', background: 'var(--accent-soft)', borderRadius: 12, border: '1px solid var(--accent)' }}>
+          <Icon name="info" size={20} style={{ color: 'var(--accent)', flexShrink: 0, marginTop: 2 }}/>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 600, color: 'var(--accent)', marginBottom: 4 }}>Selamat datang! Profil belum dibuat</div>
+            <div style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.6 }}>
+              Lengkapi profil praktik dan jadwal Anda agar pasien bisa menemukan dan booking dengan Anda.
+            </div>
+          </div>
+          <Btn variant="primary" size="sm" onClick={() => navigate('/doctor/profile?onboarding=true')}>Buat profil</Btn>
+        </div>
+      )}
+
+      {!profileLoading && profile && profile.verificationStatus === 'pending' && (
+        <div style={{ display: 'flex', gap: 14, padding: '16px 20px', background: '#FEF3C7', borderRadius: 12, border: '1px solid #FCD34D' }}>
+          <Icon name="clock" size={20} style={{ color: '#92400E', flexShrink: 0, marginTop: 2 }}/>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 600, color: '#92400E', marginBottom: 4 }}>Menunggu verifikasi admin</div>
+            <div style={{ fontSize: 13, color: '#78350F', lineHeight: 1.6 }}>
+              Profil Anda sedang ditinjau. Setelah diverifikasi, Anda akan muncul di pencarian pasien
+              dan dapat menerima appointment. Anda akan mendapat notifikasi setelah proses selesai.
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!profileLoading && profile && profile.verificationStatus === 'rejected' && (
+        <div style={{ display: 'flex', gap: 14, padding: '16px 20px', background: '#FEF2F2', borderRadius: 12, border: '1px solid #FCA5A5' }}>
+          <Icon name="x" size={20} style={{ color: '#DC2626', flexShrink: 0, marginTop: 2 }}/>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 600, color: '#DC2626', marginBottom: 4 }}>Verifikasi ditolak</div>
+            <div style={{ fontSize: 13, color: '#7F1D1D', lineHeight: 1.6 }}>
+              Profil Anda belum dapat diverifikasi. Perbarui informasi profil Anda dan hubungi admin MediSlot untuk informasi lebih lanjut.
+            </div>
+          </div>
+          <Btn variant="ghost" size="sm" onClick={() => navigate('/doctor/profile')}>Perbarui profil</Btn>
+        </div>
+      )}
+
+      {!profileLoading && profile?.isVerified && (
+        <div style={{ display: 'flex', gap: 12, padding: '12px 16px', background: '#F0FDF4', borderRadius: 10, border: '1px solid #86EFAC', alignItems: 'center' }}>
+          <Icon name="check-circ" size={16} style={{ color: '#16A34A', flexShrink: 0 }}/>
+          <span style={{ fontSize: 13, color: '#14532D' }}>
+            Profil Anda aktif dan terverifikasi — pasien dapat menemukan dan booking dengan Anda.
+          </span>
+        </div>
+      )}
 
       <div className="msGrid-4">
         <Stat label="Total appointment" value={stats.total} sub="Hari ini" icon="users" tone="accent"/>

@@ -37,7 +37,7 @@ const Sidebar = ({ open = false, onClose }) => {
     if (user?.role !== 'admin') return;
     api.get('/doctors/admin/all')
       .then(({ data }) => {
-        const count = (data.data || []).filter(d => !d.isVerified).length;
+        const count = (data.data || []).filter(d => d.verificationStatus === 'pending').length;
         setPendingCount(count);
       })
       .catch(() => {});

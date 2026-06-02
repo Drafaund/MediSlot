@@ -31,14 +31,15 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     const { data } = await api.post('/auth/login', { email, password });
     localStorage.setItem('token', data.token);
-    setUser(data.data);
+    // Fetch data lengkap dari /auth/me agar field baru (dateOfBirth, gender, dll) ikut masuk
+    await fetchCurrentUser();
     return data.data;
   };
 
   const register = async (name, email, password, role = 'patient') => {
     const { data } = await api.post('/auth/register', { name, email, password, role });
     localStorage.setItem('token', data.token);
-    setUser(data.data);
+    await fetchCurrentUser();
     return data.data;
   };
 

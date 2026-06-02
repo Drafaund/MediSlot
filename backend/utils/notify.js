@@ -1,6 +1,18 @@
 const Notification = require('../models/Notification');
 
 const TEMPLATES = {
+  doctor_registered: (doctorName) => ({
+    title: 'Dokter baru perlu diverifikasi',
+    message: `${doctorName} telah mendaftarkan profil dan menunggu verifikasi Anda.`,
+  }),
+  doctor_verified: () => ({
+    title: 'Profil Anda telah diverifikasi',
+    message: 'Selamat! Profil Anda telah diverifikasi oleh admin. Anda sekarang muncul di pencarian pasien.',
+  }),
+  doctor_rejected: () => ({
+    title: 'Verifikasi profil ditolak',
+    message: 'Profil Anda belum dapat diverifikasi. Hubungi admin MediSlot untuk informasi lebih lanjut.',
+  }),
   booking_new: (patientName) => ({
     title: 'Booking baru masuk',
     message: `${patientName} baru saja melakukan booking appointment dengan Anda.`,

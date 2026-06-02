@@ -1,4 +1,6 @@
 const DoctorProfile = require('../models/DoctorProfile');
+const User = require('../models/User');
+const createNotif = require('../utils/notify');
 
 // @desc  Get all doctors (search & filter)
 // @route GET /api/doctors
@@ -62,6 +64,17 @@ const createProfile = async (req, res) => {
       userId: req.user._id
     });
 
+    // Notifikasi ke semua admin: ada dokter baru perlu diverifikasi
+    const admins = await User.find({ role: 'admin' }, '_id');
+    admins.forEach(admin => {
+      createNotif({
+        userId: admin._id,
+        type: 'doctor_registered',
+        templateArgs: [req.user.name],
+        relatedId: profile._id
+      });
+    });
+
     res.status(201).json({ success: true, data: profile });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -73,14 +86,39 @@ const createProfile = async (req, res) => {
 // @access Private (doctor)
 const updateProfile = async (req, res) => {
   try {
+    // Cek status verifikasi sebelum update
+    const existing = await DoctorProfile.findOne({ userId: req.user._id });
+
+    const updateData = { ...req.body };
+
+    // Jika sebelumnya ditolak, ajukan ulang ke antrian verifikasi admin
+    const wasRejected = existing?.verificationStatus === 'rejected';
+    if (wasRejected) {
+      updateData.verificationStatus = 'pending';
+      updateData.isVerified = false;
+    }
+
     const profile = await DoctorProfile.findOneAndUpdate(
       { userId: req.user._id },
-      req.body,
+      updateData,
       { new: true, runValidators: true }
     );
 
     if (!profile) {
       return res.status(404).json({ success: false, message: 'Profil tidak ditemukan' });
+    }
+
+    // Notifikasi ulang ke admin jika dokter mengajukan kembali setelah ditolak
+    if (wasRejected) {
+      const admins = await User.find({ role: 'admin' }, '_id');
+      admins.forEach(admin => {
+        createNotif({
+          userId: admin._id,
+          type: 'doctor_registered',
+          templateArgs: [req.user.name],
+          relatedId: profile._id
+        });
+      });
     }
 
     res.json({ success: true, data: profile });
@@ -129,13 +167,24 @@ const verifyDoctor = async (req, res) => {
     const { isVerified } = req.body;
     const profile = await DoctorProfile.findByIdAndUpdate(
       req.params.id,
-      { isVerified },
+      {
+        isVerified,
+        verificationStatus: isVerified ? 'verified' : 'rejected'
+      },
       { new: true }
     ).populate('userId', 'name avatar email');
 
     if (!profile) {
       return res.status(404).json({ success: false, message: 'Dokter tidak ditemukan' });
     }
+
+    // Notifikasi ke dokter tentang hasil verifikasi
+    createNotif({
+      userId: profile.userId,
+      type: isVerified ? 'doctor_verified' : 'doctor_rejected',
+      templateArgs: [],
+      relatedId: profile._id
+    });
 
     res.json({ success: true, data: profile, message: `Dokter berhasil ${isVerified ? 'diverifikasi' : 'dibatalkan verifikasinya'}` });
   } catch (error) {

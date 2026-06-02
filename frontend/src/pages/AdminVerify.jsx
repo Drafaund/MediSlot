@@ -16,9 +16,10 @@ const AdminVerify = () => {
         const { data } = await api.get('/doctors/admin/all');
         const all = data.data || [];
         setAllDoctors(all);
-        const unverified = all.filter(d => !d.isVerified);
-        setDoctors(unverified);
-        if (unverified.length > 0) setSelectedId(unverified[0]._id);
+        // Hanya tampilkan yang belum pernah ditinjau (bukan yang sudah ditolak)
+        const pending = all.filter(d => d.verificationStatus === 'pending');
+        setDoctors(pending);
+        if (pending.length > 0) setSelectedId(pending[0]._id);
       } catch { /* fail silently */ }
       finally { setLoading(false); }
     };
@@ -45,10 +46,17 @@ const AdminVerify = () => {
   const handleReject = async () => {
     if (!selected) return;
     const name = selected.userId?.name || selected.name || 'Dokter';
-    setDoctors(prev => prev.filter(d => d._id !== selectedId));
-    setToast(`Pendaftaran ${name} ditolak`);
-    const next = doctors.find(d => d._id !== selectedId);
-    setSelectedId(next?._id || null);
+    try {
+      // Panggil API agar notifikasi penolakan terkirim ke dokter
+      await api.put(`/doctors/${selected._id}/verify`, { isVerified: false });
+      setDoctors(prev => prev.filter(d => d._id !== selectedId));
+      setAllDoctors(prev => prev.map(d => d._id === selectedId ? { ...d, isVerified: false } : d));
+      setToast(`Pendaftaran ${name} ditolak`);
+      const next = doctors.find(d => d._id !== selectedId);
+      setSelectedId(next?._id || null);
+    } catch {
+      setToast('Gagal menolak pendaftaran');
+    }
   };
 
   const verified = allDoctors.filter(d => d.isVerified);

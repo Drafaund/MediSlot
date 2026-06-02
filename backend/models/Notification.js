@@ -9,7 +9,7 @@ const NotificationSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['booking_new', 'appointment_confirmed', 'appointment_cancelled', 'appointment_cancelled_patient', 'appointment_cancelled_doctor', 'appointment_completed', 'record_created'],
+    enum: ['booking_new', 'appointment_confirmed', 'appointment_cancelled', 'appointment_cancelled_patient', 'appointment_cancelled_doctor', 'appointment_completed', 'record_created', 'doctor_registered', 'doctor_verified', 'doctor_rejected'],
     required: true
   },
   title: { type: String, required: true },

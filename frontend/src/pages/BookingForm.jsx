@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { Icon, Card, Badge, Avatar, Btn, Textarea, Empty, formatIDR } from '../components/ui';
 
@@ -21,6 +22,9 @@ const generateDates = () => {
 const BookingForm = () => {
   const { doctorId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  // Semua hooks harus dipanggil sebelum return kondisional apapun (Rules of Hooks)
   const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -34,6 +38,9 @@ const BookingForm = () => {
   const [availableSlots, setAvailableSlots] = useState([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [bookedAppt, setBookedAppt] = useState(null);
+
+  // Cek profil setelah semua hooks — bukan sebelumnya
+  const profileIncomplete = !user?.dateOfBirth || !user?.gender;
 
   useEffect(() => {
     const fetchDoctor = async () => {
@@ -90,6 +97,28 @@ const BookingForm = () => {
         { time: '10.30', taken: false }, { time: '11.00', taken: false }, { time: '14.00', taken: false },
         { time: '14.30', taken: false }, { time: '15.00', taken: false },
       ];
+
+  // Guard profil — setelah semua hooks
+  if (profileIncomplete) {
+    return (
+      <div style={{ maxWidth: 540, margin: '60px auto', textAlign: 'center' }}>
+        <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--accent-soft)', display: 'grid', placeItems: 'center', margin: '0 auto 20px' }}>
+          <Icon name="user" size={28} style={{ color: 'var(--accent)' }}/>
+        </div>
+        <h2 style={{ fontFamily: 'var(--serif)', fontSize: 26, marginBottom: 10 }}>Lengkapi profil dulu</h2>
+        <p style={{ color: 'var(--muted)', lineHeight: 1.6, marginBottom: 24 }}>
+          Sebelum booking, Anda perlu mengisi tanggal lahir dan jenis kelamin.
+          Data ini penting agar dokter bisa mempersiapkan pemeriksaan yang tepat.
+        </p>
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+          <Btn variant="primary" icon="user" onClick={() => navigate('/profile?onboarding=true')}>
+            Lengkapi profil sekarang
+          </Btn>
+          <Btn variant="ghost" onClick={() => navigate(-1)}>Kembali</Btn>
+        </div>
+      </div>
+    );
+  }
 
   if (step === 'done' && bookedAppt) {
     return (

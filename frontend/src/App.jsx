@@ -22,6 +22,8 @@ import PatientProfile from './pages/PatientProfile';
 import MedicalHistory from './pages/MedicalHistory';
 import SymptomChecker from './pages/SymptomChecker';
 import AdminVerify from './pages/AdminVerify';
+import AdminDoctors from './pages/AdminDoctors';
+import AdminUsers from './pages/AdminUsers';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { user, loading } = useAuth();
@@ -129,6 +131,16 @@ const AppRoutes = () => {
       <Route path="/admin/verify" element={
         <AppShell>
           <ProtectedRoute allowedRoles={['admin']}><AdminVerify /></ProtectedRoute>
+        </AppShell>
+      } />
+      <Route path="/admin/doctors" element={
+        <AppShell>
+          <ProtectedRoute allowedRoles={['admin']}><AdminDoctors /></ProtectedRoute>
+        </AppShell>
+      } />
+      <Route path="/admin/users" element={
+        <AppShell>
+          <ProtectedRoute allowedRoles={['admin']}><AdminUsers /></ProtectedRoute>
         </AppShell>
       } />
 

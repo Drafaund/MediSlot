@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../services/api';
-import { Card, Btn, Input, Toast } from '../components/ui';
+import { Icon, Card, Btn, Input, Toast } from '../components/ui';
 
 const BLOOD_TYPES = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 const GENDERS    = ['Laki-laki', 'Perempuan'];
@@ -18,6 +19,9 @@ const calcAge = (dob) => {
 
 const PatientProfile = () => {
   const { user, refreshUser } = useAuth();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isOnboarding = searchParams.get('onboarding') === 'true';
   const [saving, setSaving]   = useState(false);
   const [toast, setToast]     = useState(null);
   const [allergyInput, setAllergyInput] = useState('');
@@ -69,15 +73,43 @@ const PatientProfile = () => {
 
   const age = calcAge(form.dateOfBirth);
 
+  const isProfileComplete = !!(form.dateOfBirth && form.gender);
+
   return (
     <div className="msStack-md" style={{ maxWidth: 680 }}>
       <div>
         <div className="msEyebrow">Akun Pasien</div>
-        <h1 className="msPageTitle">Profil saya</h1>
+        <h1 className="msPageTitle">{isOnboarding ? 'Lengkapi profil Anda' : 'Profil saya'}</h1>
         <p style={{ color: 'var(--muted)', marginTop: 6 }}>
           Informasi ini membantu dokter memberikan penanganan yang tepat.
         </p>
       </div>
+
+      {/* Banner onboarding */}
+      {isOnboarding && (
+        <div style={{ display: 'flex', gap: 14, padding: '16px 20px', background: 'var(--accent-soft)', borderRadius: 12, border: '1px solid var(--accent)' }}>
+          <Icon name="info" size={20} style={{ color: 'var(--accent)', flexShrink: 0, marginTop: 2 }}/>
+          <div>
+            <div style={{ fontWeight: 600, color: 'var(--accent)', marginBottom: 4 }}>Selamat datang di MediSlot!</div>
+            <div style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.6 }}>
+              Sebelum booking dokter, lengkapi data diri Anda terlebih dahulu.
+              Data ini membantu dokter mempersiapkan pemeriksaan yang tepat.
+              <br/>
+              <strong>Wajib diisi:</strong> Tanggal lahir dan jenis kelamin.
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Indikator kelengkapan */}
+      {!isProfileComplete && (
+        <div style={{ display: 'flex', gap: 10, padding: '10px 16px', background: '#FEF3C7', borderRadius: 10, border: '1px solid #FCD34D', alignItems: 'center' }}>
+          <Icon name="warn" size={16} style={{ color: '#92400E', flexShrink: 0 }}/>
+          <span style={{ fontSize: 13, color: '#92400E' }}>
+            Profil belum lengkap — isi <strong>tanggal lahir</strong> dan <strong>jenis kelamin</strong> untuk bisa booking dokter.
+          </span>
+        </div>
+      )}
 
       {/* Info dasar */}
       <Card>
@@ -174,9 +206,17 @@ const PatientProfile = () => {
         )}
       </Card>
 
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <Btn variant="primary" icon="check" disabled={saving} onClick={handleSave}>
-          {saving ? 'Menyimpan…' : 'Simpan profil'}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+        {isOnboarding && isProfileComplete && (
+          <Btn variant="ghost" onClick={() => navigate('/')}>Lewati</Btn>
+        )}
+        <Btn variant="primary" icon="check" disabled={saving} onClick={async () => {
+          await handleSave();
+          if (isOnboarding && form.dateOfBirth && form.gender) {
+            setTimeout(() => navigate('/doctors'), 1200);
+          }
+        }}>
+          {saving ? 'Menyimpan…' : isOnboarding ? 'Simpan & mulai cari dokter' : 'Simpan profil'}
         </Btn>
       </div>
 
