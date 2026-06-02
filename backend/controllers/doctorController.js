@@ -107,4 +107,40 @@ const getMyProfile = async (req, res) => {
   }
 };
 
-module.exports = { getDoctors, getDoctor, createProfile, updateProfile, getMyProfile };
+// @desc  Get all doctors for admin (including unverified)
+// @route GET /api/doctors/admin/all
+// @access Private (admin)
+const getAllDoctorsAdmin = async (req, res) => {
+  try {
+    const doctors = await DoctorProfile.find({})
+      .populate('userId', 'name avatar email')
+      .sort({ createdAt: -1 });
+    res.json({ success: true, data: doctors });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc  Verify or unverify a doctor
+// @route PUT /api/doctors/:id/verify
+// @access Private (admin)
+const verifyDoctor = async (req, res) => {
+  try {
+    const { isVerified } = req.body;
+    const profile = await DoctorProfile.findByIdAndUpdate(
+      req.params.id,
+      { isVerified },
+      { new: true }
+    ).populate('userId', 'name avatar email');
+
+    if (!profile) {
+      return res.status(404).json({ success: false, message: 'Dokter tidak ditemukan' });
+    }
+
+    res.json({ success: true, data: profile, message: `Dokter berhasil ${isVerified ? 'diverifikasi' : 'dibatalkan verifikasinya'}` });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+module.exports = { getDoctors, getDoctor, createProfile, updateProfile, getMyProfile, getAllDoctorsAdmin, verifyDoctor };

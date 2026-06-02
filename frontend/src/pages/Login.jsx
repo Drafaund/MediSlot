@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Icon, Logo, Btn, Input } from '../components/ui';
+import api from '../services/api';
 
 const Login = () => {
   const [mode, setMode] = useState('login');
@@ -19,12 +20,23 @@ const Login = () => {
     setLoading(true);
     setError('');
     try {
+      let userData;
       if (mode === 'login') {
-        await login(email, password);
+        userData = await login(email, password);
       } else {
-        await register(name, email, password, role);
+        userData = await register(name, email, password, role);
       }
-      navigate('/');
+
+      if (userData?.role === 'doctor') {
+        try {
+          await api.get('/doctors/my-profile');
+          navigate('/doctor/dashboard');
+        } catch {
+          navigate('/doctor/profile');
+        }
+      } else {
+        navigate('/');
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Terjadi kesalahan, coba lagi.');
     } finally {

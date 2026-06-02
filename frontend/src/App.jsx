@@ -16,6 +16,7 @@ import PatientDashboard from './pages/PatientDashboard';
 import DoctorDashboard from './pages/DoctorDashboard';
 import DoctorSchedule from './pages/DoctorSchedule';
 import DoctorRecord from './pages/DoctorRecord';
+import DoctorProfileSetup from './pages/DoctorProfileSetup';
 import MedicalHistory from './pages/MedicalHistory';
 import SymptomChecker from './pages/SymptomChecker';
 import AdminVerify from './pages/AdminVerify';
@@ -90,6 +91,11 @@ const AppRoutes = () => {
       <Route path="/doctor/schedule" element={
         <AppShell>
           <ProtectedRoute allowedRoles={['doctor']}><DoctorSchedule /></ProtectedRoute>
+        </AppShell>
+      } />
+      <Route path="/doctor/profile" element={
+        <AppShell>
+          <ProtectedRoute allowedRoles={['doctor']}><DoctorProfileSetup /></ProtectedRoute>
         </AppShell>
       } />
       <Route path="/doctor/record/:patientId" element={

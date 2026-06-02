@@ -26,7 +26,7 @@ const DoctorSchedule = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const { data } = await api.get('/doctors/me');
+        const { data } = await api.get('/doctors/my-profile');
         const doctorId = data.data?._id;
         if (!doctorId) return;
         const schRes = await api.get(`/schedules/${doctorId}`);

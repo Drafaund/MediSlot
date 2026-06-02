@@ -13,7 +13,7 @@ const AdminVerify = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data } = await api.get('/doctors?limit=50');
+        const { data } = await api.get('/doctors/admin/all');
         const all = data.data || [];
         setAllDoctors(all);
         const unverified = all.filter(d => !d.isVerified);

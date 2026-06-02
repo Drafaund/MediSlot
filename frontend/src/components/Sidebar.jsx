@@ -15,7 +15,7 @@ const SIDEBAR_ITEMS = {
   doctor: [
     { path: '/doctor/dashboard', icon: 'home', label: 'Dashboard' },
     { path: '/doctor/schedule', icon: 'calendar', label: 'Jadwal Praktik' },
-    { path: '/doctor/patients', icon: 'users', label: 'Pasien Saya' },
+    { path: '/doctor/profile', icon: 'user', label: 'Profil Saya' },
   ],
   admin: [
     { path: '/admin/verify', icon: 'shield', label: 'Verifikasi Dokter', badge: '3' },
