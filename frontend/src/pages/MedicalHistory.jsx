@@ -119,18 +119,22 @@ const MedicalHistory = () => {
                   <p style={{ marginTop: 10, lineHeight: 1.65, color: 'var(--ink-2)' }}>{aiSummary.overview}</p>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                  <div style={{ padding: 16, background: 'var(--bg-2)', borderRadius: 12, border: '1px solid var(--border)' }}>
-                    <div className="msEyebrow">Kondisi kronis</div>
-                    <ul style={{ margin: '8px 0 0', paddingLeft: 18, fontSize: 14, lineHeight: 1.6 }}>
-                      {(aiSummary.chronicConditions || []).map((c, i) => <li key={i}>{c}</li>)}
-                    </ul>
-                  </div>
-                  <div style={{ padding: 16, background: 'var(--bg-2)', borderRadius: 12, border: '1px solid var(--border)' }}>
-                    <div className="msEyebrow">Obat rutin</div>
-                    <ul style={{ margin: '8px 0 0', paddingLeft: 18, fontSize: 14, lineHeight: 1.6 }}>
-                      {(aiSummary.ongoingMedications || []).map((m, i) => <li key={i}>{m}</li>)}
-                    </ul>
-                  </div>
+                  {aiSummary.chronicConditions?.length > 0 && (
+                    <div style={{ padding: 16, background: 'var(--bg-2)', borderRadius: 12, border: '1px solid var(--border)' }}>
+                      <div className="msEyebrow">Kondisi yang dipantau</div>
+                      <ul style={{ margin: '8px 0 0', paddingLeft: 18, fontSize: 14, lineHeight: 1.6 }}>
+                        {aiSummary.chronicConditions.map((c, i) => <li key={i}>{c}</li>)}
+                      </ul>
+                    </div>
+                  )}
+                  {aiSummary.ongoingMedications?.length > 0 && (
+                    <div style={{ padding: 16, background: 'var(--bg-2)', borderRadius: 12, border: '1px solid var(--border)' }}>
+                      <div className="msEyebrow">Obat rutin</div>
+                      <ul style={{ margin: '8px 0 0', paddingLeft: 18, fontSize: 14, lineHeight: 1.6 }}>
+                        {aiSummary.ongoingMedications.map((m, i) => <li key={i}>{m}</li>)}
+                      </ul>
+                    </div>
+                  )}
                 </div>
                 {aiSummary.patterns && (
                   <div>

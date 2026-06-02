@@ -72,7 +72,11 @@ const healthSummary = async (req, res) => {
       return res.json({
         success: true,
         data: {
-          summary: 'Belum ada riwayat medis yang tersimpan. Ringkasan kesehatan akan tersedia setelah Anda memiliki rekam medis dari kunjungan dokter.',
+          overview: 'Belum ada riwayat medis yang tersimpan. Ringkasan kesehatan akan tersedia setelah Anda memiliki rekam medis dari kunjungan dokter.',
+          chronicConditions: [],
+          ongoingMedications: [],
+          patterns: [],
+          recommendations: [],
           recordCount: 0
         }
       });
@@ -111,21 +115,29 @@ const healthSummary = async (req, res) => {
     const response = await groq.chat.completions.create({
       model: MODEL,
       temperature: 0.4,
+      response_format: { type: 'json_object' },
       messages: [
         {
           role: 'system',
           content: `Kamu adalah asisten kesehatan digital untuk platform MediSlot.
-Tugasmu adalah membuat ringkasan kondisi kesehatan pasien berdasarkan riwayat rekam medisnya.
-Sampaikan dalam Bahasa Indonesia yang hangat, mudah dipahami orang awam, dan actionable.
+Buat ringkasan kondisi kesehatan pasien berdasarkan riwayat rekam medisnya dalam Bahasa Indonesia yang hangat dan mudah dipahami orang awam.
 
-Gunakan struktur berikut:
-1. **Gambaran Umum** — kondisi kesehatan secara keseluruhan
-2. **Pola Kesehatan** — penyakit atau gejala yang sering muncul
-3. **Perkembangan** — apakah kondisi membaik, memburuk, atau stabil
-4. **Saran Praktis** — maksimal 3 langkah konkret yang bisa dilakukan
-5. **Pengingat** — ingatkan bahwa ini bukan pengganti konsultasi dokter
+Jawab HANYA dalam format JSON berikut (tanpa teks di luar JSON):
+{
+  "overview": "ringkasan 2-3 kalimat tentang kondisi kesehatan pasien secara keseluruhan dan perkembangannya",
+  "monitoredConditions": ["kondisi atau diagnosis yang muncul lebih dari sekali dan perlu dipantau — kosongkan array ini jika semua kunjungan bersifat akut/sesaat"],
+  "ongoingMedications": ["nama obat (dosis, frekuensi) yang masih diresepkan"],
+  "patterns": ["pola kesehatan yang terdeteksi dari kunjungan, misalnya tren membaik/memburuk"],
+  "recommendations": ["saran praktis 1", "saran praktis 2", "saran praktis 3"]
+}
 
-Maksimal 350 kata. Hindari istilah medis yang terlalu teknis.`
+Aturan:
+- overview: 2-3 kalimat, bahasa awam
+- monitoredConditions: HANYA isi jika kondisi muncul di lebih dari 1 kunjungan dan butuh pemantauan rutin. Penyakit akut seperti flu, ISPA, demam biasa JANGAN dimasukkan. Maks 4 item, atau array kosong []
+- ongoingMedications: ambil dari resep terakhir, maks 5 item
+- patterns: maks 3 item
+- recommendations: tepat 3 item, konkret dan actionable
+- Jangan gunakan istilah medis yang terlalu teknis`
         },
         {
           role: 'user',
@@ -134,10 +146,16 @@ Maksimal 350 kata. Hindari istilah medis yang terlalu teknis.`
       ]
     });
 
+    const parsed = JSON.parse(response.choices[0].message.content);
+
     res.json({
       success: true,
       data: {
-        summary: response.choices[0].message.content,
+        overview:            parsed.overview            || '',
+        chronicConditions:   parsed.monitoredConditions || parsed.chronicConditions || [],
+        ongoingMedications:  parsed.ongoingMedications  || [],
+        patterns:            parsed.patterns             || [],
+        recommendations:     parsed.recommendations      || [],
         recordCount: records.length,
         generatedAt: new Date().toISOString()
       }
