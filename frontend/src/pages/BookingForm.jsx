@@ -11,7 +11,7 @@ const generateDates = () => {
     dates.push({
       label: i === 0 ? 'Hari ini' : i === 1 ? 'Besok' : d.toLocaleDateString('id-ID', { weekday: 'short' }),
       date: d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }),
-      dateStr: d.toISOString().split('T')[0],
+      dateStr: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`,
       dayNum: d.getDate(),
     });
   }
