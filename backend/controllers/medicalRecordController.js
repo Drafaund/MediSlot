@@ -15,12 +15,16 @@ const getDoctorProfileOrFail = async (userId) => {
 // Dokter: hanya pasien yang pernah ditanganinya
 const assertRecordAccess = async (record, user) => {
   if (user.role === 'patient') {
-    if (record.patientId.toString() !== user._id.toString()) {
+    // patientId may be populated (User doc) or bare ObjectId
+    const recordPatientId = record.patientId?._id ?? record.patientId;
+    if (recordPatientId.toString() !== user._id.toString()) {
       throw { status: 403, message: 'Akses ditolak' };
     }
   } else if (user.role === 'doctor') {
     const profile = await getDoctorProfileOrFail(user._id);
-    if (record.doctorId.toString() !== profile._id.toString()) {
+    // doctorId may be populated (DoctorProfile doc) or bare ObjectId
+    const recordDoctorId = record.doctorId?._id ?? record.doctorId;
+    if (recordDoctorId.toString() !== profile._id.toString()) {
       throw { status: 403, message: 'Akses ditolak — bukan pasien Anda' };
     }
   } else {

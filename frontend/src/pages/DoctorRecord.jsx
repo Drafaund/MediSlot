@@ -12,7 +12,6 @@ const DoctorRecord = () => {
   const [existingRecord, setExistingRecord] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
   const [draftSaved, setDraftSaved] = useState(false);
   const [history, setHistory] = useState([]);
   const DRAFT_KEY = `medislot_draft_${appointmentId}`;
@@ -33,12 +32,14 @@ const DoctorRecord = () => {
 
         const patientId = appt.patientId?._id || appt.patientId;
 
-        if (appt.status === 'completed') {
-          try {
-            const r = await api.get(`/medical-records/appointment/${appointmentId}`);
+        // Always check for an existing record — handles status desync between appointment and record
+        try {
+          const r = await api.get(`/medical-records/appointment/${appointmentId}`);
+          if (r.data.data) {
             setExistingRecord(r.data.data);
-          } catch {}
-        } else {
+          }
+        } catch {
+          // No saved record — restore draft or pre-fill from appointment notes
           const complaint = appt.notes || '';
           const savedDraft = localStorage.getItem(`medislot_draft_${appointmentId}`);
           if (savedDraft) {
@@ -74,7 +75,7 @@ const DoctorRecord = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await api.post('/medical-records', {
+      const { data } = await api.post('/medical-records', {
         appointmentId,
         patientId: appointment?.patientId?._id || appointment?.patientId,
         chiefComplaint: form.chiefComplaint,
@@ -90,7 +91,8 @@ const DoctorRecord = () => {
         time: appointment?.timeSlot,
       });
       localStorage.removeItem(DRAFT_KEY);
-      setSaved(true);
+      // Immediately switch to view mode using the record returned by the server
+      setExistingRecord(data.data);
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to save medical record');
     } finally {
@@ -137,8 +139,8 @@ const DoctorRecord = () => {
   };
   const patientAge = calcAge(patient?.dateOfBirth);
 
-  // ── VIEW MODE: appointment completed + rekam medis sudah ada ──
-  if (appointment?.status === 'completed' && existingRecord) {
+  // ── VIEW MODE: rekam medis sudah tersimpan ──
+  if (appointment && existingRecord) {
     const rec = existingRecord;
     return (
       <div className="msStack-md" style={{ maxWidth: 900 }}>
@@ -500,7 +502,6 @@ const DoctorRecord = () => {
       </div>
 
       {draftSaved && <Toast msg="Draft saved locally to your browser" onClose={() => setDraftSaved(false)}/>}
-      {saved && <Toast msg="Medical record saved successfully" onClose={() => { setSaved(false); navigate('/doctor/dashboard'); }}/>}
     </div>
   );
 };
