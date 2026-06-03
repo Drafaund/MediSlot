@@ -7,6 +7,42 @@ const createNotif = require('../utils/notify');
 // @access Public
 const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').slice(0, 100);
 
+// Bi-directional alias map: Indonesian ↔ English specialization names
+// Needed because legacy/seed data may use English while new registrations use Indonesian
+const SPEC_ALIAS = {
+  'Penyakit Dalam':           'Internal Medicine',
+  'Anak':                     'Pediatrics',
+  'Kandungan':                'Obstetrics & Gynecology',
+  'Bedah Umum':               'General Surgery',
+  'Jantung & Pembuluh Darah': 'Cardiology',
+  'Saraf':                    'Neurology',
+  'Mata':                     'Ophthalmology',
+  'THT':                      'ENT',
+  'Kulit & Kelamin':          'Dermatology & Venereology',
+  'Ortopedi':                 'Orthopedics',
+  'Urologi':                  'Urology',
+  'Psikiatri':                'Psychiatry',
+  'Paru':                     'Pulmonology',
+  'Gigi & Mulut':             'Dentistry',
+  'Dokter Umum':              'General Practitioner',
+  // reverse (English → Indonesian) for completeness
+  'Internal Medicine':        'Penyakit Dalam',
+  'Pediatrics':               'Anak',
+  'Obstetrics & Gynecology':  'Kandungan',
+  'General Surgery':          'Bedah Umum',
+  'Cardiology':               'Jantung & Pembuluh Darah',
+  'Neurology':                'Saraf',
+  'Ophthalmology':            'Mata',
+  'ENT':                      'THT',
+  'Dermatology & Venereology':'Kulit & Kelamin',
+  'Orthopedics':              'Ortopedi',
+  'Urology':                  'Urologi',
+  'Psychiatry':               'Psikiatri',
+  'Pulmonology':              'Paru',
+  'Dentistry':                'Gigi & Mulut',
+  'General Practitioner':     'Dokter Umum',
+};
+
 const getDoctors = async (req, res) => {
   try {
     const { city, specialization, acceptBPJS, search } = req.query;
@@ -14,7 +50,11 @@ const getDoctors = async (req, res) => {
     const filter = { isVerified: true };
 
     if (city) filter.city = new RegExp(escapeRegex(city), 'i');
-    if (specialization) filter.specialization = new RegExp(escapeRegex(specialization), 'i');
+    if (specialization) {
+      const alias = SPEC_ALIAS[specialization];
+      const terms = [specialization, alias].filter(Boolean).map(t => new RegExp(escapeRegex(t), 'i'));
+      filter.specialization = { $in: terms };
+    }
     if (acceptBPJS !== undefined) filter.acceptBPJS = acceptBPJS === 'true';
     if (search) {
       const safe = escapeRegex(search);
