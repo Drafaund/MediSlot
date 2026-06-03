@@ -18,9 +18,9 @@ const symptomCheck = async (req, res) => {
     }
 
     const userPrompt = [
-      `Gejala: ${symptoms.trim()}`,
-      duration ? `Durasi gejala: ${duration}` : null,
-      ageGroup ? `Kelompok usia: ${ageGroup}` : null,
+      `Symptoms: ${symptoms.trim()}`,
+      duration ? `Duration: ${duration}` : null,
+      ageGroup ? `Age group: ${ageGroup}` : null,
     ]
       .filter(Boolean)
       .join("\n");

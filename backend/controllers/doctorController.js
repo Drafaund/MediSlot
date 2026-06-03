@@ -58,9 +58,15 @@ const getDoctors = async (req, res) => {
     if (acceptBPJS !== undefined) filter.acceptBPJS = acceptBPJS === 'true';
     if (search) {
       const safe = escapeRegex(search);
+      const matchingUsers = await User.find(
+        { name: new RegExp(safe, 'i') },
+        '_id'
+      ).lean();
+      const userIds = matchingUsers.map(u => u._id);
       filter.$or = [
         { clinicName: new RegExp(safe, 'i') },
-        { specialization: new RegExp(safe, 'i') }
+        { specialization: new RegExp(safe, 'i') },
+        ...(userIds.length ? [{ userId: { $in: userIds } }] : []),
       ];
     }
 
