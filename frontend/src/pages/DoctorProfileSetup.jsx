@@ -4,10 +4,21 @@ import api from '../services/api';
 import { Icon, Card, Btn, Input, Textarea, Toast } from '../components/ui';
 
 const SPECIALIZATIONS = [
-  'General Practitioner', 'Internal Medicine', 'Pediatrics', 'Obstetrics & Gynecology',
-  'General Surgery', 'Cardiology', 'Neurology', 'Ophthalmology',
-  'ENT', 'Dermatology & Venereology', 'Orthopedics', 'Urology',
-  'Psychiatry', 'Pulmonology', 'Dentistry',
+  { value: 'Dokter Umum',                label: 'General Practitioner' },
+  { value: 'Penyakit Dalam',             label: 'Internal Medicine (Sp.PD)' },
+  { value: 'Anak',                       label: 'Pediatrics (Sp.A)' },
+  { value: 'Kandungan',                  label: 'Obstetrics & Gynecology (Sp.OG)' },
+  { value: 'Bedah Umum',                 label: 'General Surgery (Sp.B)' },
+  { value: 'Jantung & Pembuluh Darah',   label: 'Cardiology (Sp.JP)' },
+  { value: 'Saraf',                      label: 'Neurology (Sp.S)' },
+  { value: 'Mata',                       label: 'Ophthalmology (Sp.M)' },
+  { value: 'THT',                        label: 'ENT (Sp.THT)' },
+  { value: 'Kulit & Kelamin',            label: 'Dermatology & Venereology (Sp.KK)' },
+  { value: 'Ortopedi',                   label: 'Orthopedics (Sp.OT)' },
+  { value: 'Urologi',                    label: 'Urology (Sp.U)' },
+  { value: 'Psikiatri',                  label: 'Psychiatry (Sp.KJ)' },
+  { value: 'Paru',                       label: 'Pulmonology (Sp.P)' },
+  { value: 'Gigi & Mulut',              label: 'Dentistry (drg.)' },
 ];
 
 const DoctorProfileSetup = () => {
@@ -124,7 +135,7 @@ const DoctorProfileSetup = () => {
             <select value={form.specialization} onChange={e => set('specialization', e.target.value)}
               className="msPick" style={{ width: '100%', border: '1px solid var(--border)', marginTop: 6, background: 'var(--paper)', outline: 'none', borderRadius: 8, padding: '10px 12px', fontSize: 14 }}>
               <option value="">— Select specialization —</option>
-              {SPECIALIZATIONS.map(s => <option key={s} value={s}>{s}</option>)}
+              {SPECIALIZATIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
             </select>
           </div>
           <Input label="License Number (STR) *" placeholder="STR-XX-2024-001" value={form.licenseNumber} onChange={v => set('licenseNumber', v)}/>

@@ -1,19 +1,34 @@
 const SPEC_DEGREE = {
-  'Penyakit Dalam':         'Sp.PD',
-  'Anak':                   'Sp.A',
-  'Kandungan':              'Sp.OG',
-  'Bedah Umum':             'Sp.B',
+  // Indonesian keys (stored by new registrations)
+  'Penyakit Dalam':           'Sp.PD',
+  'Anak':                     'Sp.A',
+  'Kandungan':                'Sp.OG',
+  'Bedah Umum':               'Sp.B',
   'Jantung & Pembuluh Darah': 'Sp.JP',
-  'Saraf':                  'Sp.S',
-  'Mata':                   'Sp.M',
-  'THT':                    'Sp.THT',
-  'Kulit & Kelamin':        'Sp.KK',
-  'Ortopedi':               'Sp.OT',
-  'Urologi':                'Sp.U',
-  'Psikiatri':              'Sp.KJ',
-  'Paru':                   'Sp.P',
-  // Dokter Umum → tidak ada suffix
-  // Gigi & Mulut → prefix drg. (ditangani sendiri)
+  'Saraf':                    'Sp.S',
+  'Mata':                     'Sp.M',
+  'THT':                      'Sp.THT',
+  'Kulit & Kelamin':          'Sp.KK',
+  'Ortopedi':                 'Sp.OT',
+  'Urologi':                  'Sp.U',
+  'Psikiatri':                'Sp.KJ',
+  'Paru':                     'Sp.P',
+  // English fallbacks (for existing data / seed doctors)
+  'Internal Medicine':        'Sp.PD',
+  'Pediatrics':               'Sp.A',
+  'Obstetrics & Gynecology':  'Sp.OG',
+  'General Surgery':          'Sp.B',
+  'Cardiology':               'Sp.JP',
+  'Neurology':                'Sp.S',
+  'Ophthalmology':            'Sp.M',
+  'ENT':                      'Sp.THT',
+  'Dermatology & Venereology':'Sp.KK',
+  'Orthopedics':              'Sp.OT',
+  'Urology':                  'Sp.U',
+  'Psychiatry':               'Sp.KJ',
+  'Pulmonology':              'Sp.P',
+  // Dokter Umum / General Practitioner → tidak ada suffix
+  // Gigi & Mulut / Dentistry → prefix drg. (ditangani sendiri)
 };
 
 /**
@@ -26,7 +41,7 @@ const SPEC_DEGREE = {
 export const formatDoctorName = (name, specialization, additionalDegrees = []) => {
   if (!name) return 'Dokter';
 
-  const isDental = specialization === 'Gigi & Mulut';
+  const isDental = specialization === 'Gigi & Mulut' || specialization === 'Dentistry';
   const prefix   = isDental ? 'drg.' : 'dr.';
 
   const specDegree = isDental ? '' : (SPEC_DEGREE[specialization] || '');

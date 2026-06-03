@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { Icon, Card, Badge, Avatar, Btn, Textarea, Empty, formatIDR } from '../components/ui';
+import { formatDoctorName } from '../utils/doctorName';
 
 const generateDates = () => {
   const dates = [];
@@ -87,8 +88,9 @@ const BookingForm = () => {
   if (!doctor) return <Empty icon="user" title="Doctor not found" action={<Btn variant="secondary" onClick={() => navigate('/doctors')}>Back</Btn>}/>;
 
   const d = doctor;
-  const doctorName = d.userId?.name || d.name || 'Doctor';
-  const initials = doctorName.split(' ').map(x => x[0]).slice(0, 2).join('');
+  const rawName = d.userId?.name || d.name || 'Doctor';
+  const doctorName = formatDoctorName(rawName, d.specialization, d.additionalDegrees);
+  const initials = rawName.split(' ').map(x => x[0]).slice(0, 2).join('');
 
   const slotTimes = availableSlots.length > 0
     ? availableSlots.map(s => ({ time: typeof s === 'string' ? s : s.time, taken: false }))
