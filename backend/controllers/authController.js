@@ -92,6 +92,8 @@ const login = async (req, res) => {
 // @desc  Redirect ke Google OAuth
 // @route GET /api/auth/google
 // @access Public
+const CLIENT_URL = (process.env.CLIENT_URL || 'http://localhost:3000').trim().replace(/\/+$/, '');
+
 const googleAuth = passport.authenticate('google', { scope: ['profile', 'email'] });
 
 // @desc  Google OAuth callback
@@ -100,17 +102,16 @@ const googleAuth = passport.authenticate('google', { scope: ['profile', 'email']
 const googleCallback = async (req, res) => {
   try {
     const token = generateToken(req.user._id);
-    // Redirect ke frontend dengan token di query param
-    res.redirect(`${process.env.CLIENT_URL}/auth/google/success?token=${token}`);
+    res.redirect(`${CLIENT_URL}/auth/google/success?token=${token}`);
   } catch (error) {
-    res.redirect(`${process.env.CLIENT_URL}/login?error=google_auth_failed`);
+    res.redirect(`${CLIENT_URL}/login?error=google_auth_failed`);
   }
 };
 
 // Middleware passport untuk callback
 const googleCallbackMiddleware = passport.authenticate('google', {
   session: false,
-  failureRedirect: `${process.env.CLIENT_URL}/login?error=google_auth_failed`
+  failureRedirect: `${CLIENT_URL}/login?error=google_auth_failed`
 });
 
 // @desc  Get current user
