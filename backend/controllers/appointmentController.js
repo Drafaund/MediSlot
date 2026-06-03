@@ -96,7 +96,7 @@ const createAppointment = async (req, res) => {
 
     res.status(201).json({ success: true, data: populated, message: 'Appointment berhasil dibuat' });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === 'production' ? 'Server error' : error.message });
   }
 };
 
@@ -131,7 +131,7 @@ const getMyAppointments = async (req, res) => {
       pagination: { total, page: Number(page), limit: Number(limit), totalPages: Math.ceil(total / Number(limit)) }
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === 'production' ? 'Server error' : error.message });
   }
 };
 
@@ -173,7 +173,7 @@ const getDoctorAppointments = async (req, res) => {
       pagination: { total, page: Number(page), limit: Number(limit), totalPages: Math.ceil(total / Number(limit)) }
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === 'production' ? 'Server error' : error.message });
   }
 };
 
@@ -246,7 +246,7 @@ const updateAppointmentStatus = async (req, res) => {
 
     res.json({ success: true, data: updated, message: `Status appointment berhasil diubah menjadi '${status}'` });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === 'production' ? 'Server error' : error.message });
   }
 };
 
@@ -283,7 +283,7 @@ const getAppointmentById = async (req, res) => {
 
     res.json({ success: true, data: appointment });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === 'production' ? 'Server error' : error.message });
   }
 };
 

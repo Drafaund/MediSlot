@@ -53,7 +53,7 @@ const getAvailableSlots = async (req, res) => {
 
     res.json({ success: true, data: availableSlots });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === 'production' ? 'Server error' : error.message });
   }
 };
 
@@ -66,10 +66,11 @@ const createSchedule = async (req, res) => {
     const doctorProfile = await DoctorProfile.findOne({ userId: req.user._id });
     if (!doctorProfile) return res.status(404).json({ success: false, message: 'Profil dokter tidak ditemukan' });
 
-    const schedule = await Schedule.create({ ...req.body, doctorId: doctorProfile._id });
+    const { dayOfWeek, startTime, endTime, slotDuration, maxPatients, isActive } = req.body;
+    const schedule = await Schedule.create({ dayOfWeek, startTime, endTime, slotDuration, maxPatients, isActive, doctorId: doctorProfile._id });
     res.status(201).json({ success: true, data: schedule });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === 'production' ? 'Server error' : error.message });
   }
 };
 
@@ -81,7 +82,7 @@ const getSchedules = async (req, res) => {
     const schedules = await Schedule.find({ doctorId: req.params.doctorId, isActive: true });
     res.json({ success: true, data: schedules });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === 'production' ? 'Server error' : error.message });
   }
 };
 

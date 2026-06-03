@@ -42,7 +42,7 @@ const UserSchema = new mongoose.Schema({
   },
   gender: {
     type: String,
-    enum: ['Laki-laki', 'Perempuan', ''],
+    enum: ['Male', 'Female', ''],
     default: ''
   },
   bloodType: {

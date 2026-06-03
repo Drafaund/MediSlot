@@ -44,7 +44,7 @@ const register = async (req, res) => {
       token
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === 'production' ? 'Server error' : error.message });
   }
 };
 
@@ -85,7 +85,7 @@ const login = async (req, res) => {
       token
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === 'production' ? 'Server error' : error.message });
   }
 };
 
@@ -118,9 +118,10 @@ const googleCallbackMiddleware = passport.authenticate('google', {
 // @access Private
 const getMe = async (req, res) => {
   try {
-    res.json({ success: true, data: req.user });
+    const { _id, name, email, role, phone, avatar, dateOfBirth, gender, bloodType, allergies } = req.user;
+    res.json({ success: true, data: { _id, name, email, role, phone, avatar, dateOfBirth, gender, bloodType, allergies } });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
@@ -143,11 +144,11 @@ const updateProfile = async (req, res) => {
       req.user._id,
       allowed,
       { new: true, runValidators: true }
-    );
+    ).select('-googleId -__v -password');
 
     res.json({ success: true, data: user, message: 'Profil berhasil diperbarui' });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === 'production' ? 'Server error' : error.message });
   }
 };
 
@@ -164,7 +165,7 @@ const deleteUser = async (req, res) => {
     await User.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: `Akun ${user.name} berhasil dihapus` });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === 'production' ? 'Server error' : error.message });
   }
 };
 
@@ -180,7 +181,7 @@ const getAllUsers = async (req, res) => {
       .sort({ createdAt: -1 });
     res.json({ success: true, data: users });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === 'production' ? 'Server error' : error.message });
   }
 };
 

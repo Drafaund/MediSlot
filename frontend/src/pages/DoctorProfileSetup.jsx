@@ -4,10 +4,10 @@ import api from '../services/api';
 import { Icon, Card, Btn, Input, Textarea, Toast } from '../components/ui';
 
 const SPECIALIZATIONS = [
-  'Dokter Umum', 'Penyakit Dalam', 'Anak', 'Kandungan',
-  'Bedah Umum', 'Jantung & Pembuluh Darah', 'Saraf', 'Mata',
-  'THT', 'Kulit & Kelamin', 'Ortopedi', 'Urologi',
-  'Psikiatri', 'Paru', 'Gigi & Mulut',
+  'General Practitioner', 'Internal Medicine', 'Pediatrics', 'Obstetrics & Gynecology',
+  'General Surgery', 'Cardiology', 'Neurology', 'Ophthalmology',
+  'ENT', 'Dermatology & Venereology', 'Orthopedics', 'Urology',
+  'Psychiatry', 'Pulmonology', 'Dentistry',
 ];
 
 const DoctorProfileSetup = () => {

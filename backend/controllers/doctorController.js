@@ -5,19 +5,22 @@ const createNotif = require('../utils/notify');
 // @desc  Get all doctors (search & filter)
 // @route GET /api/doctors
 // @access Public
+const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').slice(0, 100);
+
 const getDoctors = async (req, res) => {
   try {
     const { city, specialization, acceptBPJS, search } = req.query;
 
     const filter = { isVerified: true };
 
-    if (city) filter.city = new RegExp(city, 'i');
-    if (specialization) filter.specialization = new RegExp(specialization, 'i');
+    if (city) filter.city = new RegExp(escapeRegex(city), 'i');
+    if (specialization) filter.specialization = new RegExp(escapeRegex(specialization), 'i');
     if (acceptBPJS !== undefined) filter.acceptBPJS = acceptBPJS === 'true';
     if (search) {
+      const safe = escapeRegex(search);
       filter.$or = [
-        { clinicName: new RegExp(search, 'i') },
-        { specialization: new RegExp(search, 'i') }
+        { clinicName: new RegExp(safe, 'i') },
+        { specialization: new RegExp(safe, 'i') }
       ];
     }
 
@@ -27,7 +30,7 @@ const getDoctors = async (req, res) => {
 
     res.json({ success: true, data: doctors });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === 'production' ? 'Server error' : error.message });
   }
 };
 
@@ -37,7 +40,7 @@ const getDoctors = async (req, res) => {
 const getDoctor = async (req, res) => {
   try {
     const doctor = await DoctorProfile.findById(req.params.id)
-      .populate('userId', 'name avatar email phone');
+      .populate('userId', 'name avatar');
 
     if (!doctor) {
       return res.status(404).json({ success: false, message: 'Dokter tidak ditemukan' });
@@ -45,7 +48,7 @@ const getDoctor = async (req, res) => {
 
     res.json({ success: true, data: doctor });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === 'production' ? 'Server error' : error.message });
   }
 };
 
@@ -59,8 +62,14 @@ const createProfile = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Profil dokter sudah ada' });
     }
 
+    const {
+      specialization, licenseNumber, clinicName, clinicAddress,
+      city, consultationFee, acceptBPJS, bio, additionalDegrees, yearsOfExperience
+    } = req.body;
+
     const profile = await DoctorProfile.create({
-      ...req.body,
+      specialization, licenseNumber, clinicName, clinicAddress,
+      city, consultationFee, acceptBPJS, bio, additionalDegrees, yearsOfExperience,
       userId: req.user._id
     });
 
@@ -77,7 +86,7 @@ const createProfile = async (req, res) => {
 
     res.status(201).json({ success: true, data: profile });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === 'production' ? 'Server error' : error.message });
   }
 };
 
@@ -89,7 +98,15 @@ const updateProfile = async (req, res) => {
     // Cek status verifikasi sebelum update
     const existing = await DoctorProfile.findOne({ userId: req.user._id });
 
-    const updateData = { ...req.body };
+    const {
+      specialization, licenseNumber, clinicName, clinicAddress,
+      city, consultationFee, acceptBPJS, bio, additionalDegrees, yearsOfExperience
+    } = req.body;
+
+    const updateData = {
+      specialization, licenseNumber, clinicName, clinicAddress,
+      city, consultationFee, acceptBPJS, bio, additionalDegrees, yearsOfExperience
+    };
 
     // Jika sebelumnya ditolak, ajukan ulang ke antrian verifikasi admin
     const wasRejected = existing?.verificationStatus === 'rejected';
@@ -123,7 +140,7 @@ const updateProfile = async (req, res) => {
 
     res.json({ success: true, data: profile });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === 'production' ? 'Server error' : error.message });
   }
 };
 
@@ -141,7 +158,7 @@ const getMyProfile = async (req, res) => {
 
     res.json({ success: true, data: profile });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === 'production' ? 'Server error' : error.message });
   }
 };
 
@@ -155,7 +172,7 @@ const getAllDoctorsAdmin = async (req, res) => {
       .sort({ createdAt: -1 });
     res.json({ success: true, data: doctors });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === 'production' ? 'Server error' : error.message });
   }
 };
 
@@ -188,7 +205,7 @@ const verifyDoctor = async (req, res) => {
 
     res.json({ success: true, data: profile, message: `Dokter berhasil ${isVerified ? 'diverifikasi' : 'dibatalkan verifikasinya'}` });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === 'production' ? 'Server error' : error.message });
   }
 };
 

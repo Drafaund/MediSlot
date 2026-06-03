@@ -62,14 +62,20 @@ const createMedicalRecord = async (req, res) => {
     if (appointment.doctorId.toString() !== doctorProfile._id.toString()) {
       return res.status(403).json({ success: false, message: 'Akses ditolak — bukan appointment Anda' });
     }
-    if (appointment.status !== 'completed') {
-      return res.status(400).json({ success: false, message: 'Rekam medis hanya bisa dibuat untuk appointment yang sudah completed' });
+    if (!['confirmed', 'completed'].includes(appointment.status)) {
+      return res.status(400).json({ success: false, message: 'Rekam medis hanya bisa dibuat untuk appointment yang sudah dikonfirmasi atau selesai' });
     }
 
     // Cegah duplikat — 1 appointment : 1 rekam medis
     const existing = await MedicalRecord.findOne({ appointmentId });
     if (existing) {
       return res.status(400).json({ success: false, message: 'Rekam medis untuk appointment ini sudah ada' });
+    }
+
+    // Auto-complete appointment saat rekam medis disimpan
+    if (appointment.status === 'confirmed') {
+      appointment.status = 'completed';
+      await appointment.save();
     }
 
     const record = await MedicalRecord.create({
@@ -146,7 +152,7 @@ const getMyMedicalRecords = async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === 'production' ? 'Server error' : error.message });
   }
 };
 
@@ -198,7 +204,7 @@ const getPatientMedicalRecords = async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === 'production' ? 'Server error' : error.message });
   }
 };
 
@@ -229,9 +235,37 @@ const getMedicalRecordById = async (req, res) => {
   }
 };
 
+// @desc  Ambil rekam medis berdasarkan appointmentId
+// @route GET /api/medical-records/appointment/:appointmentId
+// @access Private (patient bersangkutan atau dokter yang menangani)
+const getMedicalRecordByAppointment = async (req, res) => {
+  try {
+    const record = await MedicalRecord.findOne({ appointmentId: req.params.appointmentId })
+      .populate('patientId', 'name email phone avatar dateOfBirth gender bloodType allergies')
+      .populate({
+        path: 'doctorId',
+        select: 'specialization clinicName clinicAddress licenseNumber additionalDegrees',
+        populate: { path: 'userId', select: 'name avatar' }
+      })
+      .populate('appointmentId', 'date timeSlot queueNumber status notes');
+
+    if (!record) {
+      return res.status(404).json({ success: false, message: 'Rekam medis tidak ditemukan' });
+    }
+
+    await assertRecordAccess(record, req.user);
+
+    res.json({ success: true, data: record });
+  } catch (error) {
+    const status = error.status || 500;
+    res.status(status).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   createMedicalRecord,
   getMyMedicalRecords,
   getPatientMedicalRecords,
-  getMedicalRecordById
+  getMedicalRecordById,
+  getMedicalRecordByAppointment
 };

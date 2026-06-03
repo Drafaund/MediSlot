@@ -28,19 +28,19 @@ const symptomCheck = async (req, res) => {
       messages: [
         {
           role: 'system',
-          content: `Kamu adalah asisten kesehatan digital untuk platform MediSlot di Indonesia.
-Berdasarkan gejala, durasi, dan kelompok usia pasien, rekomendasikan 2-3 spesialisasi dokter yang paling tepat.
-PENTING: Ini hanya panduan awal untuk membantu pasien memilih dokter, BUKAN diagnosa medis.
+          content: `You are a digital health assistant for the MediSlot platform in Indonesia.
+Based on the patient's symptoms, duration, and age group, recommend 2-3 most appropriate doctor specializations.
+IMPORTANT: This is only an initial guide to help patients choose a doctor, NOT a medical diagnosis.
 
-Jawab HANYA dalam format JSON berikut:
+Respond ONLY in the following JSON format:
 {
-  "explanation": "penjelasan 2-3 kalimat tentang kemungkinan kondisi pasien berdasarkan gejala, durasi, dan usia — gunakan bahasa awam yang hangat",
+  "explanation": "2-3 sentence explanation of the patient's possible condition based on symptoms, duration, and age — use warm, plain language",
   "recs": [
-    {"spec": "nama spesialisasi", "conf": 85, "why": "alasan singkat mengapa spesialisasi ini relevan"},
-    {"spec": "nama spesialisasi 2", "conf": 70, "why": "alasan singkat"}
+    {"spec": "specialization name", "conf": 85, "why": "brief reason why this specialization is relevant"},
+    {"spec": "specialization name 2", "conf": 70, "why": "brief reason"}
   ],
-  "urgency": "rendah|sedang|tinggi",
-  "disclaimer": "pesan singkat bahwa ini bukan diagnosa medis"
+  "urgency": "low|medium|high",
+  "disclaimer": "short message that this is not a medical diagnosis"
 }`
         },
         { role: 'user', content: userPrompt }
@@ -50,7 +50,7 @@ Jawab HANYA dalam format JSON berikut:
     const parsed = JSON.parse(response.choices[0].message.content);
     res.json({ success: true, data: parsed });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === 'production' ? 'Server error' : error.message });
   }
 };
 
@@ -72,7 +72,7 @@ const healthSummary = async (req, res) => {
       return res.json({
         success: true,
         data: {
-          overview: 'Belum ada riwayat medis yang tersimpan. Ringkasan kesehatan akan tersedia setelah Anda memiliki rekam medis dari kunjungan dokter.',
+          overview: 'No medical history found. Your health summary will be available once you have medical records from a doctor visit.',
           chronicConditions: [],
           ongoingMedications: [],
           patterns: [],
@@ -83,33 +83,33 @@ const healthSummary = async (req, res) => {
     }
 
     const recordsText = records.map((r, idx) => {
-      const doctorName = r.doctorId?.userId?.name ?? 'Tidak diketahui';
+      const doctorName = r.doctorId?.userId?.name ?? 'Unknown';
       const specialization = r.doctorId?.specialization ?? '';
-      const date = new Date(r.date).toLocaleDateString('id-ID', {
+      const date = new Date(r.date).toLocaleDateString('en-US', {
         day: 'numeric', month: 'long', year: 'numeric'
       });
-      const complaint = r.chiefComplaint || r.symptoms.join(', ') || 'Tidak dicatat';
+      const complaint = r.chiefComplaint || r.symptoms.join(', ') || 'Not recorded';
       const drugs = r.prescription.length > 0
         ? r.prescription.map(p => `${p.name} (${p.dosage}, ${p.frequency})`).join(', ')
-        : 'Tidak ada resep';
+        : 'No prescription';
 
       const vitalParts = [];
-      if (r.vitalSigns?.bloodPressure) vitalParts.push(`TD: ${r.vitalSigns.bloodPressure}`);
-      if (r.vitalSigns?.heartRate)     vitalParts.push(`Nadi: ${r.vitalSigns.heartRate} bpm`);
-      if (r.vitalSigns?.temperature)   vitalParts.push(`Suhu: ${r.vitalSigns.temperature}°C`);
-      if (r.vitalSigns?.weight)        vitalParts.push(`BB: ${r.vitalSigns.weight} kg`);
-      const vitals = vitalParts.length > 0 ? vitalParts.join(', ') : 'Tidak dicatat';
+      if (r.vitalSigns?.bloodPressure) vitalParts.push(`BP: ${r.vitalSigns.bloodPressure}`);
+      if (r.vitalSigns?.heartRate)     vitalParts.push(`HR: ${r.vitalSigns.heartRate} bpm`);
+      if (r.vitalSigns?.temperature)   vitalParts.push(`Temp: ${r.vitalSigns.temperature}°C`);
+      if (r.vitalSigns?.weight)        vitalParts.push(`Weight: ${r.vitalSigns.weight} kg`);
+      const vitals = vitalParts.length > 0 ? vitalParts.join(', ') : 'Not recorded';
 
       const followUp = r.followUpDate
-        ? `Kontrol ulang: ${new Date(r.followUpDate).toLocaleDateString('id-ID')}`
+        ? `Follow-up: ${new Date(r.followUpDate).toLocaleDateString('en-US')}`
         : '';
 
       return `[${idx + 1}] ${date} — ${r.clinicName} | Dr. ${doctorName}${specialization ? ` (${specialization})` : ''}
-   Keluhan: ${complaint}
-   Diagnosa: ${r.diagnosis}
-   Tanda Vital: ${vitals}
-   Pengobatan: ${r.treatment || 'Tidak dicatat'}
-   Resep: ${drugs}${followUp ? `\n   ${followUp}` : ''}`;
+   Complaint: ${complaint}
+   Diagnosis: ${r.diagnosis}
+   Vital Signs: ${vitals}
+   Treatment: ${r.treatment || 'Not recorded'}
+   Prescription: ${drugs}${followUp ? `\n   ${followUp}` : ''}`;
     }).join('\n\n');
 
     const response = await groq.chat.completions.create({
@@ -119,29 +119,29 @@ const healthSummary = async (req, res) => {
       messages: [
         {
           role: 'system',
-          content: `Kamu adalah asisten kesehatan digital untuk platform MediSlot.
-Buat ringkasan kondisi kesehatan pasien berdasarkan riwayat rekam medisnya dalam Bahasa Indonesia yang hangat dan mudah dipahami orang awam.
+          content: `You are a digital health assistant for the MediSlot platform.
+Create a health summary for the patient based on their medical history in warm, plain English that is easy for a layperson to understand.
 
-Jawab HANYA dalam format JSON berikut (tanpa teks di luar JSON):
+Respond ONLY in the following JSON format (no text outside JSON):
 {
-  "overview": "ringkasan 2-3 kalimat tentang kondisi kesehatan pasien secara keseluruhan dan perkembangannya",
-  "monitoredConditions": ["kondisi atau diagnosis yang muncul lebih dari sekali dan perlu dipantau — kosongkan array ini jika semua kunjungan bersifat akut/sesaat"],
-  "ongoingMedications": ["nama obat (dosis, frekuensi) yang masih diresepkan"],
-  "patterns": ["pola kesehatan yang terdeteksi dari kunjungan, misalnya tren membaik/memburuk"],
-  "recommendations": ["saran praktis 1", "saran praktis 2", "saran praktis 3"]
+  "overview": "2-3 sentence summary of the patient's overall health condition and its progress",
+  "monitoredConditions": ["condition or diagnosis that appears more than once and needs monitoring — leave this array empty if all visits are acute/one-time"],
+  "ongoingMedications": ["medication name (dose, frequency) still being prescribed"],
+  "patterns": ["health patterns detected from visits, e.g. improving or worsening trends"],
+  "recommendations": ["practical advice 1", "practical advice 2", "practical advice 3"]
 }
 
-Aturan:
-- overview: 2-3 kalimat, bahasa awam
-- monitoredConditions: HANYA isi jika kondisi muncul di lebih dari 1 kunjungan dan butuh pemantauan rutin. Penyakit akut seperti flu, ISPA, demam biasa JANGAN dimasukkan. Maks 4 item, atau array kosong []
-- ongoingMedications: ambil dari resep terakhir, maks 5 item
-- patterns: maks 3 item
-- recommendations: tepat 3 item, konkret dan actionable
-- Jangan gunakan istilah medis yang terlalu teknis`
+Rules:
+- overview: 2-3 sentences, plain language
+- monitoredConditions: ONLY include if a condition appears in more than 1 visit and requires routine monitoring. Acute conditions like flu, cold, or fever SHOULD NOT be included. Max 4 items, or empty array []
+- ongoingMedications: take from most recent prescription, max 5 items
+- patterns: max 3 items
+- recommendations: exactly 3 items, concrete and actionable
+- Avoid overly technical medical terminology`
         },
         {
           role: 'user',
-          content: `Berikut riwayat medis pasien (${records.length} kunjungan terakhir):\n\n${recordsText}`
+          content: `Here is the patient's medical history (last ${records.length} visits):\n\n${recordsText}`
         }
       ]
     });
@@ -161,7 +161,7 @@ Aturan:
       }
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === 'production' ? 'Server error' : error.message });
   }
 };
 

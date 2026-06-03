@@ -143,20 +143,11 @@ const TopBar = ({ onToggle }) => {
       </button>
 
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 14 }}>
-        {user.role === 'patient' && (
-          <button className="msTopbar-search" onClick={() => navigate('/doctors')}>
-            <Icon name="search" size={16} style={{ color: 'var(--muted)' }}/>
-            <span style={{ color: 'var(--muted)', fontSize: 14 }}>Search for doctors, specializations, or clinics…</span>
-            <span className="msHero-kbd" style={{ marginLeft: 'auto' }}>⌘K</span>
-          </button>
-        )}
-        {user.role !== 'patient' && (
-          <div style={{ fontSize: 13, color: 'var(--muted)' }}>
-            <span style={{ color: 'var(--ink-2)' }}>{user.name}</span>
-            <span> · </span>
-            <span>{user.email}</span>
-          </div>
-        )}
+        <div style={{ fontSize: 13, color: 'var(--muted)' }}>
+          <span style={{ color: 'var(--ink-2)' }}>{user.name}</span>
+          <span> · </span>
+          <span>{user.email}</span>
+        </div>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

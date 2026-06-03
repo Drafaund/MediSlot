@@ -9,10 +9,13 @@ const DoctorRecord = () => {
   const { patientId: appointmentId } = useParams();
   const navigate = useNavigate();
   const [appointment, setAppointment] = useState(null);
+  const [existingRecord, setExistingRecord] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [draftSaved, setDraftSaved] = useState(false);
   const [history, setHistory] = useState([]);
+  const DRAFT_KEY = `medislot_draft_${appointmentId}`;
   const [historyOpen, setHistoryOpen] = useState(false);
   const [form, setForm] = useState({
     chiefComplaint: '', diagnosis: '', symptoms: [],
@@ -26,17 +29,33 @@ const DoctorRecord = () => {
       .then(({ data }) => {
         const appt = data.data;
         setAppointment(appt);
-        setForm(prev => ({ ...prev, chiefComplaint: appt.notes || '' }));
+
+        if (appt.status === 'completed') {
+          // Mode view: ambil rekam medis yang sudah tersimpan
+          api.get(`/medical-records/appointment/${appointmentId}`)
+            .then(r => setExistingRecord(r.data.data))
+            .catch(() => {});
+        } else {
+          // Mode input: restore draft atau pre-fill dari catatan appointment
+          const complaint = appt.notes || '';
+          const savedDraft = localStorage.getItem(`medislot_draft_${appointmentId}`);
+          if (savedDraft) {
+            try { setForm(prev => ({ ...prev, ...JSON.parse(savedDraft) })); }
+            catch { localStorage.removeItem(`medislot_draft_${appointmentId}`); setForm(prev => ({ ...prev, chiefComplaint: complaint })); }
+          } else {
+            setForm(prev => ({ ...prev, chiefComplaint: complaint }));
+          }
+        }
 
         // Fetch patient's medical record history created by this doctor
         const patientId = appt.patientId?._id || appt.patientId;
         if (patientId) {
           api.get(`/medical-records/patient/${patientId}`)
             .then(r => setHistory(r.data.data || []))
-            .catch(() => { /* patient has no prior history */ });
+            .catch(() => {});
         }
       })
-      .catch(() => { /* use empty form */ })
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, [appointmentId]);
 
@@ -45,6 +64,11 @@ const DoctorRecord = () => {
   const updRx = (i, k, v) => setField('prescription', form.prescription.map((p, idx) => idx === i ? { ...p, [k]: v } : p));
   const addRx = () => setField('prescription', [...form.prescription, { name: '', dosage: '', frequency: '', duration: '' }]);
   const removeRx = (i) => setField('prescription', form.prescription.filter((_, idx) => idx !== i));
+
+  const handleSaveDraft = () => {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(form));
+    setDraftSaved(true);
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -55,7 +79,7 @@ const DoctorRecord = () => {
         chiefComplaint: form.chiefComplaint,
         diagnosis: form.diagnosis,
         symptoms: form.symptoms,
-        vitalSigns: { bp: form.bp, hr: form.hr, temp: form.temp, weight: form.weight, height: form.height },
+        vitalSigns: { bloodPressure: form.bp, heartRate: form.hr ? Number(form.hr) : undefined, temperature: form.temp ? Number(form.temp) : undefined, weight: form.weight ? Number(form.weight) : undefined, height: form.height ? Number(form.height) : undefined },
         treatment: form.treatment,
         prescription: form.prescription.filter(p => p.name),
         notes: form.notes,
@@ -64,6 +88,7 @@ const DoctorRecord = () => {
         date: appointment?.date,
         time: appointment?.timeSlot,
       });
+      localStorage.removeItem(DRAFT_KEY);
       setSaved(true);
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to save medical record');
@@ -73,6 +98,28 @@ const DoctorRecord = () => {
   };
 
   if (loading) return <div style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>Loading…</div>;
+
+  if (appointment && !['confirmed', 'completed'].includes(appointment.status)) {
+    return (
+      <div className="msStack-md" style={{ maxWidth: 600, margin: '0 auto' }}>
+        <button className="msBack" onClick={() => navigate('/doctor/dashboard')}>
+          <Icon name="chevron-l" size={16}/> Back to dashboard
+        </button>
+        <Card>
+          <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+            <Icon name="clock" size={44} style={{ color: 'var(--muted)', marginBottom: 16 }}/>
+            <h2 style={{ marginBottom: 8 }}>Appointment not yet confirmed</h2>
+            <p style={{ color: 'var(--muted)', fontSize: 14, lineHeight: 1.6 }}>
+              Please confirm the patient's appointment first before filling in the medical record.
+            </p>
+            <Btn variant="primary" style={{ marginTop: 24 }} onClick={() => navigate('/doctor/dashboard')}>
+              Back to dashboard
+            </Btn>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   const patient = appointment?.patientId;
   const patientName = patient?.name || 'Patient';
@@ -88,6 +135,158 @@ const DoctorRecord = () => {
     return age;
   };
   const patientAge = calcAge(patient?.dateOfBirth);
+
+  // ── VIEW MODE: appointment completed + rekam medis sudah ada ──
+  if (appointment?.status === 'completed' && existingRecord) {
+    const rec = existingRecord;
+    return (
+      <div className="msStack-md" style={{ maxWidth: 900 }}>
+        <button className="msBack" onClick={() => navigate('/doctor/dashboard')}>
+          <Icon name="chevron-l" size={16}/> Back to dashboard
+        </button>
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+          <div>
+            <div className="msEyebrow">Medical Record · Queue #{String(appointment?.queueNumber || 1).padStart(2, '0')}</div>
+            <h1 className="msPageTitle">Consultation summary</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 10 }}>
+              <Avatar initials={patientInitials} color="mauve" size={36}/>
+              <div>
+                <strong>{patientName}</strong>
+                <span style={{ color: 'var(--muted)' }}> · {appointment?.timeSlot} · {new Date(appointment?.date).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+              </div>
+            </div>
+          </div>
+          <Badge tone="sage" icon="check-circ">Completed</Badge>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 16 }}>
+            <div className="msStack-md">
+              <Card>
+                <div className="msEyebrow" style={{ marginBottom: 14 }}>1 · Complaint & symptoms</div>
+                <div style={{ marginBottom: 10 }}>
+                  <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 4 }}>Chief complaint</div>
+                  <p style={{ fontSize: 14, lineHeight: 1.6, margin: 0 }}>{rec.chiefComplaint || '—'}</p>
+                </div>
+                {rec.symptoms?.length > 0 && (
+                  <div>
+                    <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 6 }}>Symptoms</div>
+                    <div className="msChip-row">
+                      {rec.symptoms.map(s => <span key={s} className="msChip msChip-active">{s}</span>)}
+                    </div>
+                  </div>
+                )}
+              </Card>
+
+              <Card>
+                <div className="msEyebrow" style={{ marginBottom: 14 }}>2 · Vital signs</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10 }}>
+                  {[
+                    { label: 'Blood pressure', value: rec.vitalSigns?.bloodPressure, unit: 'mmHg' },
+                    { label: 'Heart rate', value: rec.vitalSigns?.heartRate, unit: 'bpm' },
+                    { label: 'Temperature', value: rec.vitalSigns?.temperature, unit: '°C' },
+                    { label: 'Weight', value: rec.vitalSigns?.weight, unit: 'kg' },
+                    { label: 'Height', value: rec.vitalSigns?.height, unit: 'cm' },
+                  ].map(({ label, value, unit }) => (
+                    <div key={label} style={{ padding: '10px 12px', background: 'var(--bg-2)', borderRadius: 10, border: '1px solid var(--border)' }}>
+                      <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 4 }}>{label}</div>
+                      <div style={{ fontFamily: 'var(--mono)', fontWeight: 600, fontSize: 15 }}>{value || '—'}</div>
+                      <div style={{ fontSize: 11, color: 'var(--muted)' }}>{unit}</div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+
+              <Card>
+                <div className="msEyebrow" style={{ marginBottom: 14 }}>3 · Diagnosis & treatment</div>
+                <div style={{ marginBottom: 12 }}>
+                  <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 4 }}>Diagnosis</div>
+                  <p style={{ fontSize: 14, fontWeight: 600, margin: 0 }}>{rec.diagnosis || '—'}</p>
+                </div>
+                {rec.treatment && (
+                  <div>
+                    <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 4 }}>Treatment & therapy plan</div>
+                    <p style={{ fontSize: 14, lineHeight: 1.6, margin: 0 }}>{rec.treatment}</p>
+                  </div>
+                )}
+              </Card>
+
+              {rec.prescription?.length > 0 && (
+                <Card>
+                  <div className="msEyebrow" style={{ marginBottom: 14 }}>4 · Prescription</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {rec.prescription.map((p, i) => (
+                      <div key={i} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1.4fr 1fr', gap: 8, padding: '10px 12px', background: 'var(--bg-2)', borderRadius: 10, border: '1px solid var(--border)' }}>
+                        <div><div style={{ fontSize: 11, color: 'var(--muted)' }}>Medicine</div><strong style={{ fontSize: 13 }}>{p.name}</strong></div>
+                        <div><div style={{ fontSize: 11, color: 'var(--muted)' }}>Dose</div><span style={{ fontSize: 13 }}>{p.dosage || '—'}</span></div>
+                        <div><div style={{ fontSize: 11, color: 'var(--muted)' }}>Frequency</div><span style={{ fontSize: 13 }}>{p.frequency || '—'}</span></div>
+                        <div><div style={{ fontSize: 11, color: 'var(--muted)' }}>Duration</div><span style={{ fontSize: 13 }}>{p.duration || '—'}</span></div>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              )}
+
+              {(rec.notes || rec.followUpDate) && (
+                <Card>
+                  <div className="msEyebrow" style={{ marginBottom: 14 }}>5 · Notes & follow-up</div>
+                  {rec.notes && <p style={{ fontSize: 14, lineHeight: 1.6, margin: 0 }}>{rec.notes}</p>}
+                  {rec.followUpDate && (
+                    <div style={{ marginTop: 10, padding: '8px 12px', background: 'var(--accent-soft)', borderRadius: 8, fontSize: 13, color: 'var(--accent)' }}>
+                      <Icon name="calendar" size={13}/> Follow-up: {new Date(rec.followUpDate).toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                    </div>
+                  )}
+                </Card>
+              )}
+            </div>
+
+            {/* Right: patient info */}
+            <div style={{ position: 'sticky', top: 24, alignSelf: 'flex-start' }} className="msStack-sm">
+              <Card>
+                <div className="msEyebrow" style={{ marginBottom: 10 }}>Patient data</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
+                  <Avatar initials={patientInitials} color="mauve" size={44}/>
+                  <div>
+                    <div style={{ fontWeight: 600 }}>{patientName}</div>
+                    <div style={{ fontSize: 13, color: 'var(--muted)' }}>
+                      {[patient?.gender, patientAge != null ? `${patientAge} years old` : null].filter(Boolean).join(' · ') || patient?.email}
+                    </div>
+                  </div>
+                </div>
+                {(patient?.bloodType || patient?.allergies?.length > 0) && (
+                  <div style={{ padding: '10px 0' }}>
+                    {patient?.bloodType && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 6 }}>
+                        <span style={{ color: 'var(--muted)' }}>Blood type</span>
+                        <strong style={{ fontFamily: 'var(--mono)' }}>{patient.bloodType}</strong>
+                      </div>
+                    )}
+                    {patient?.allergies?.length > 0 && (
+                      <div>
+                        <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 4 }}>Allergies</div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                          {patient.allergies.map(a => (
+                            <span key={a} style={{ padding: '2px 8px', borderRadius: 6, background: '#FEF3C7', color: '#92400E', fontSize: 12, fontWeight: 500 }}>⚠ {a}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </Card>
+              <Card style={{ background: 'var(--bg-2)' }}>
+                <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 6 }}>Recorded by</div>
+                <div style={{ fontWeight: 600, fontSize: 14 }}>{rec.doctorId?.userId?.name || 'Doctor'}</div>
+                <div style={{ fontSize: 13, color: 'var(--muted)' }}>{rec.doctorId?.specialization}</div>
+                <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>{rec.doctorId?.clinicName}</div>
+                <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 8 }}>
+                  Saved on {new Date(rec.createdAt).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                </div>
+              </Card>
+            </div>
+          </div>
+        </div>
+    );
+  }
 
   return (
     <div className="msStack-md" style={{ maxWidth: 1080 }}>
@@ -108,7 +307,7 @@ const DoctorRecord = () => {
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <Btn variant="ghost" onClick={() => handleSave()}>Save draft</Btn>
+          <Btn variant="ghost" onClick={handleSaveDraft}>Save draft</Btn>
           <Btn variant="primary" icon="check" disabled={saving} onClick={handleSave}>
             {saving ? 'Saving…' : 'Save medical record'}
           </Btn>
@@ -299,6 +498,7 @@ const DoctorRecord = () => {
         </div>
       </div>
 
+      {draftSaved && <Toast msg="Draft saved locally to your browser" onClose={() => setDraftSaved(false)}/>}
       {saved && <Toast msg="Medical record saved successfully" onClose={() => { setSaved(false); navigate('/doctor/dashboard'); }}/>}
     </div>
   );

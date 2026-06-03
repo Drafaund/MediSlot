@@ -219,23 +219,33 @@ const DoctorDashboard = () => {
                 )}
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 20 }}>
-                  {(selected.status === 'pending' || selected.status === 'confirmed') && (
+                  {selected.status === 'pending' && (
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <Btn variant="primary" full icon="check" onClick={() => updateStatus(selected._id, 'confirmed')}>
+                        Confirm appointment
+                      </Btn>
+                      <Btn variant="ghost" icon="x" onClick={() => updateStatus(selected._id, 'cancelled')}>Reject</Btn>
+                    </div>
+                  )}
+                  {selected.status === 'confirmed' && (
                     <>
+                      <div style={{ padding: '10px 14px', background: 'var(--accent-soft)', borderRadius: 10, fontSize: 13, color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <Icon name="stetho" size={14}/> Consultation in progress — fill in the medical record to complete.
+                      </div>
                       <Btn variant="primary" icon="doc-add" full onClick={() => navigate(`/doctor/record/${selected._id}`)}>
                         Input medical record
                       </Btn>
-                      <div style={{ display: 'flex', gap: 8 }}>
-                        <Btn variant="secondary" full icon="check" onClick={() => updateStatus(selected._id, 'completed')}>
-                          Complete consultation
-                        </Btn>
-                        <Btn variant="ghost" icon="x" onClick={() => updateStatus(selected._id, 'cancelled')}>Reject</Btn>
-                      </div>
                     </>
                   )}
                   {selected.status === 'completed' && (
                     <Btn variant="secondary" icon="file" full onClick={() => navigate(`/doctor/record/${selected._id}`)}>
                       View medical record
                     </Btn>
+                  )}
+                  {selected.status === 'cancelled' && (
+                    <div style={{ padding: '10px 14px', background: 'var(--bg-2)', borderRadius: 10, fontSize: 13, color: 'var(--muted)', textAlign: 'center' }}>
+                      This appointment has been cancelled.
+                    </div>
                   )}
                 </div>
               </Card>

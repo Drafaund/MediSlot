@@ -16,7 +16,7 @@ const getNotifications = async (req, res) => {
 
     res.json({ success: true, data: notifications, unreadCount });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === 'production' ? 'Server error' : error.message });
   }
 };
 
@@ -33,7 +33,7 @@ const markAsRead = async (req, res) => {
     if (!notif) return res.status(404).json({ success: false, message: 'Notifikasi tidak ditemukan' });
     res.json({ success: true, data: notif });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === 'production' ? 'Server error' : error.message });
   }
 };
 
@@ -45,7 +45,7 @@ const markAllAsRead = async (req, res) => {
     await Notification.updateMany({ userId: req.user._id, isRead: false }, { isRead: true });
     res.json({ success: true, message: 'Semua notifikasi ditandai sudah dibaca' });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === 'production' ? 'Server error' : error.message });
   }
 };
 
