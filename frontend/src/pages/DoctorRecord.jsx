@@ -25,18 +25,20 @@ const DoctorRecord = () => {
   });
 
   useEffect(() => {
-    api.get(`/appointments/${appointmentId}`)
-      .then(({ data }) => {
+    const load = async () => {
+      try {
+        const { data } = await api.get(`/appointments/${appointmentId}`);
         const appt = data.data;
         setAppointment(appt);
 
+        const patientId = appt.patientId?._id || appt.patientId;
+
         if (appt.status === 'completed') {
-          // Mode view: ambil rekam medis yang sudah tersimpan
-          api.get(`/medical-records/appointment/${appointmentId}`)
-            .then(r => setExistingRecord(r.data.data))
-            .catch(() => {});
+          try {
+            const r = await api.get(`/medical-records/appointment/${appointmentId}`);
+            setExistingRecord(r.data.data);
+          } catch {}
         } else {
-          // Mode input: restore draft atau pre-fill dari catatan appointment
           const complaint = appt.notes || '';
           const savedDraft = localStorage.getItem(`medislot_draft_${appointmentId}`);
           if (savedDraft) {
@@ -47,16 +49,15 @@ const DoctorRecord = () => {
           }
         }
 
-        // Fetch patient's medical record history created by this doctor
-        const patientId = appt.patientId?._id || appt.patientId;
         if (patientId) {
           api.get(`/medical-records/patient/${patientId}`)
             .then(r => setHistory(r.data.data || []))
             .catch(() => {});
         }
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+      } catch {}
+      setLoading(false);
+    };
+    load();
   }, [appointmentId]);
 
   const setField = (k, v) => setForm(prev => ({ ...prev, [k]: v }));
