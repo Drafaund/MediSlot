@@ -3,6 +3,25 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { Icon, Card, Btn, Input, Textarea, Toast } from '../components/ui';
 
+// Map English → Indonesian for migrating legacy data stored with English values
+const EN_TO_ID = {
+  'General Practitioner':     'Dokter Umum',
+  'Internal Medicine':        'Penyakit Dalam',
+  'Pediatrics':               'Anak',
+  'Obstetrics & Gynecology':  'Kandungan',
+  'General Surgery':          'Bedah Umum',
+  'Cardiology':               'Jantung & Pembuluh Darah',
+  'Neurology':                'Saraf',
+  'Ophthalmology':            'Mata',
+  'ENT':                      'THT',
+  'Dermatology & Venereology':'Kulit & Kelamin',
+  'Orthopedics':              'Ortopedi',
+  'Urology':                  'Urologi',
+  'Psychiatry':               'Psikiatri',
+  'Pulmonology':              'Paru',
+  'Dentistry':                'Gigi & Mulut',
+};
+
 const SPECIALIZATIONS = [
   { value: 'Dokter Umum',                label: 'General Practitioner' },
   { value: 'Penyakit Dalam',             label: 'Internal Medicine (Sp.PD)' },
@@ -48,8 +67,9 @@ const DoctorProfileSetup = () => {
       .then(({ data }) => {
         if (data.data) {
           const p = data.data;
+          const rawSpec = p.specialization || '';
           setForm({
-            specialization: p.specialization || '',
+            specialization: EN_TO_ID[rawSpec] || rawSpec,
             licenseNumber: p.licenseNumber || '',
             clinicName: p.clinicName || '',
             clinicAddress: p.clinicAddress || '',

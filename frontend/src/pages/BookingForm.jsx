@@ -92,13 +92,7 @@ const BookingForm = () => {
   const doctorName = formatDoctorName(rawName, d.specialization, d.additionalDegrees);
   const initials = rawName.split(' ').map(x => x[0]).slice(0, 2).join('');
 
-  const slotTimes = availableSlots.length > 0
-    ? availableSlots.map(s => ({ time: typeof s === 'string' ? s : s.time, taken: false }))
-    : [
-        { time: '09.00', taken: false }, { time: '09.30', taken: false }, { time: '10.00', taken: false },
-        { time: '10.30', taken: false }, { time: '11.00', taken: false }, { time: '14.00', taken: false },
-        { time: '14.30', taken: false }, { time: '15.00', taken: false },
-      ];
+  const slotTimes = availableSlots.map(s => ({ time: typeof s === 'string' ? s : s.time, taken: false }));
 
   // Profile guard — after all hooks
   if (profileIncomplete) {
@@ -203,6 +197,11 @@ const BookingForm = () => {
             </div>
             {slotsLoading ? (
               <div style={{ height: 100, display: 'grid', placeItems: 'center', color: 'var(--muted)' }}>Loading slots…</div>
+            ) : slotTimes.length === 0 ? (
+              <div style={{ height: 100, display: 'grid', placeItems: 'center', textAlign: 'center', color: 'var(--muted)', fontSize: 14 }}>
+                No available slots for this date.<br/>
+                <span style={{ fontSize: 12 }}>The doctor may not practice on this day, or all slots have passed.</span>
+              </div>
             ) : (
               <div className="msSlot-grid">
                 {slotTimes.map(s => (

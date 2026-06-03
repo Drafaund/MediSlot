@@ -113,7 +113,6 @@ const Home = () => {
             <div className="msHero-search" onClick={() => navigate('/doctors')}>
               <Icon name="search" size={18} style={{ color: 'var(--muted)' }}/>
               <span style={{ color: 'var(--muted)' }}>Search for doctors, specializations, or clinics…</span>
-              <span className="msHero-kbd">⌘ K</span>
             </div>
           </div>
           <div className="msHero-aside">

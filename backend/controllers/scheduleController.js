@@ -49,7 +49,18 @@ const getAvailableSlots = async (req, res) => {
     }).select('timeSlot');
 
     const bookedSlots = bookedAppointments.map(a => a.timeSlot);
-    const availableSlots = generateSlots(schedule, bookedSlots);
+    let availableSlots = generateSlots(schedule, bookedSlots);
+
+    // Filter out past slots if the requested date is today (WIB = UTC+7)
+    const nowWIB = new Date(Date.now() + 7 * 60 * 60 * 1000);
+    const todayWIB = nowWIB.toISOString().slice(0, 10);
+    if (date === todayWIB) {
+      const currentMinutes = nowWIB.getUTCHours() * 60 + nowWIB.getUTCMinutes();
+      availableSlots = availableSlots.filter(slot => {
+        const [h, m] = slot.split(':').map(Number);
+        return h * 60 + m > currentMinutes;
+      });
+    }
 
     res.json({ success: true, data: availableSlots });
   } catch (error) {
@@ -86,4 +97,32 @@ const getSchedules = async (req, res) => {
   }
 };
 
-module.exports = { getAvailableSlots, createSchedule, getSchedules };
+// @desc  Update an existing schedule
+// @route PUT /api/schedules/:id
+// @access Private (doctor)
+const updateSchedule = async (req, res) => {
+  try {
+    const DoctorProfile = require('../models/DoctorProfile');
+    const doctorProfile = await DoctorProfile.findOne({ userId: req.user._id });
+    if (!doctorProfile) return res.status(404).json({ success: false, message: 'Profil dokter tidak ditemukan' });
+
+    const schedule = await Schedule.findById(req.params.id);
+    if (!schedule) return res.status(404).json({ success: false, message: 'Jadwal tidak ditemukan' });
+    if (schedule.doctorId.toString() !== doctorProfile._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Akses ditolak' });
+    }
+
+    const { dayOfWeek, startTime, endTime, slotDuration, maxPatients, isActive } = req.body;
+    const updated = await Schedule.findByIdAndUpdate(
+      req.params.id,
+      { dayOfWeek, startTime, endTime, slotDuration, maxPatients, isActive },
+      { new: true, runValidators: true }
+    );
+
+    res.json({ success: true, data: updated });
+  } catch (error) {
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === 'production' ? 'Server error' : error.message });
+  }
+};
+
+module.exports = { getAvailableSlots, createSchedule, getSchedules, updateSchedule };
