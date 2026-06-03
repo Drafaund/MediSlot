@@ -116,7 +116,7 @@ const PatientProfile = () => {
         <div style={{ fontFamily: 'var(--serif)', fontSize: 17, marginBottom: 16 }}>Basic information</div>
         <div className="msStack-sm">
           <Input label="Full name" value={form.name} onChange={v => set('name', v)} placeholder="Jane Doe"/>
-          <Input label="Phone number" value={form.phone} onChange={v => set('phone', v)} placeholder="081234567890"/>
+          <Input label="Phone number" type="tel" value={form.phone} onChange={v => set('phone', v.replace(/\D/g, ''))} placeholder="081234567890"/>
         </div>
       </Card>
 

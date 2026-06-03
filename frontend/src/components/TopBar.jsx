@@ -143,11 +143,7 @@ const TopBar = ({ onToggle }) => {
       </button>
 
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 14 }}>
-        <div style={{ fontSize: 13, color: 'var(--muted)' }}>
-          <span style={{ color: 'var(--ink-2)' }}>{user.name}</span>
-          <span> · </span>
-          <span>{user.email}</span>
-        </div>
+        <div />
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
