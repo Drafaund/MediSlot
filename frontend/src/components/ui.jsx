@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import logoImg from '../medislot-logo-no-bg.png';
 
 const SPEC_EN = {
   'Dokter Umum': 'General Practitioner',
@@ -66,11 +67,7 @@ export const Icon = ({ name, size = 20, stroke = 1.6, className, style }) => {
 
 // ─── Logo ──────────────────────────────────────────────────────────────────
 export const Logo = ({ size = 28 }) => (
-  <svg width={size} height={size} viewBox="0 0 32 32" fill="none">
-    <rect x="2" y="2" width="28" height="28" rx="8" fill="var(--accent)"/>
-    <path d="M16 9v14M9 16h14" stroke="var(--paper)" strokeWidth="2.4" strokeLinecap="round"/>
-    <circle cx="16" cy="16" r="3.2" fill="var(--paper)"/>
-  </svg>
+  <img src={logoImg} alt="MediSlot" width={size} height={size} style={{ objectFit: 'contain' }} />
 );
 
 // ─── Button ────────────────────────────────────────────────────────────────
